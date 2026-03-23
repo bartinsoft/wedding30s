@@ -4,7 +4,7 @@
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <router-link to="/" class="font-script text-2xl text-gold-400">Wedding30s</router-link>
         <router-link :to="`/create?id=${id}`" class="text-sm text-gold-400 hover:text-gold-300 transition-colors">
-          Edit Website
+          {{ $t('dashboard.editWebsite') }}
         </router-link>
       </div>
     </nav>
@@ -12,12 +12,12 @@
     <div class="pt-24 pb-16 max-w-6xl mx-auto px-6">
       <div v-if="loading" class="text-center py-20">
         <div class="w-8 h-8 border-2 border-gold-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p class="text-gray-400 mt-4">Loading your dashboard...</p>
+        <p class="text-gray-400 mt-4">{{ $t('dashboard.loading') }}</p>
       </div>
 
       <template v-else>
         <div class="mb-12">
-          <p class="font-script text-gold-400 text-2xl mb-2">Your Wedding Website</p>
+          <p class="font-script text-gold-400 text-2xl mb-2">{{ $t('dashboard.yourWeddingWebsite') }}</p>
           <h1 class="font-serif text-4xl md:text-5xl text-white">
             {{ wedding?.partner1 }} & {{ wedding?.partner2 }}
           </h1>
@@ -25,7 +25,7 @@
 
         <div class="grid md:grid-cols-3 gap-6 mb-12">
           <div class="p-6 rounded-2xl bg-gray-900/50 border border-white/5">
-            <p class="text-sm text-gray-400 mb-1">Wedding URL</p>
+            <p class="text-sm text-gray-400 mb-1">{{ $t('dashboard.weddingUrl') }}</p>
             <div class="flex items-center gap-2 mt-2">
               <code class="text-gold-400 text-sm truncate flex-1">
                 {{ weddingUrl }}
@@ -46,7 +46,7 @@
           </div>
 
           <div class="p-6 rounded-2xl bg-gray-900/50 border border-white/5">
-            <p class="text-sm text-gray-400 mb-1">QR Code</p>
+            <p class="text-sm text-gray-400 mb-1">{{ $t('dashboard.qrCode') }}</p>
             <div class="mt-2 w-24 h-24 bg-white rounded-lg flex items-center justify-center">
               <div ref="qrContainer" class="w-20 h-20 bg-gray-100 rounded flex items-center justify-center text-[8px] text-gray-400">
                 QR Code
@@ -55,10 +55,10 @@
           </div>
 
           <div class="p-6 rounded-2xl bg-gray-900/50 border border-white/5">
-            <p class="text-sm text-gray-400 mb-1">Wedding Date</p>
+            <p class="text-sm text-gray-400 mb-1">{{ $t('dashboard.weddingDate') }}</p>
             <p class="text-2xl font-serif text-white mt-2">{{ formattedDate }}</p>
             <p v-if="daysUntil > 0" class="text-gold-400 text-sm mt-1">
-              {{ daysUntil }} days to go
+              {{ $t('dashboard.daysToGo', { days: daysUntil }) }}
             </p>
           </div>
         </div>
@@ -66,33 +66,33 @@
         <div class="grid sm:grid-cols-4 gap-4 mb-12">
           <div
             v-for="stat in stats"
-            :key="stat.label"
+            :key="stat.labelKey"
             class="p-5 rounded-2xl bg-gray-900/50 border border-white/5 text-center"
           >
             <p class="text-3xl font-serif" :class="stat.color">{{ stat.value }}</p>
-            <p class="text-sm text-gray-400 mt-1">{{ stat.label }}</p>
+            <p class="text-sm text-gray-400 mt-1">{{ $t('dashboard.' + stat.labelKey) }}</p>
           </div>
         </div>
 
         <div class="rounded-2xl bg-gray-900/50 border border-white/5 overflow-hidden">
           <div class="p-6 border-b border-white/5 flex items-center justify-between">
-            <h2 class="font-serif text-xl text-white">Guest List & RSVPs</h2>
-            <span class="text-sm text-gray-400">{{ guests.length }} guests</span>
+            <h2 class="font-serif text-xl text-white">{{ $t('dashboard.guestListRsvps') }}</h2>
+            <span class="text-sm text-gray-400">{{ $t('dashboard.guests', { count: guests.length }) }}</span>
           </div>
 
           <div v-if="guests.length === 0" class="p-12 text-center">
-            <p class="text-gray-500">No RSVPs yet. Share your wedding URL to start receiving responses.</p>
+            <p class="text-gray-500">{{ $t('dashboard.noRsvps') }}</p>
           </div>
 
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left text-sm text-gray-400 border-b border-white/5">
-                  <th class="px-6 py-3 font-medium">Name</th>
-                  <th class="px-6 py-3 font-medium">Attending</th>
-                  <th class="px-6 py-3 font-medium">Menu</th>
-                  <th class="px-6 py-3 font-medium">Allergies</th>
-                  <th class="px-6 py-3 font-medium">Message</th>
+                  <th class="px-6 py-3 font-medium">{{ $t('dashboard.name') }}</th>
+                  <th class="px-6 py-3 font-medium">{{ $t('dashboard.attending') }}</th>
+                  <th class="px-6 py-3 font-medium">{{ $t('dashboard.menuHeader') }}</th>
+                  <th class="px-6 py-3 font-medium">{{ $t('dashboard.allergies') }}</th>
+                  <th class="px-6 py-3 font-medium">{{ $t('dashboard.message') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -111,7 +111,7 @@
                         'bg-yellow-500/20 text-yellow-400': guest.attending === 'pending',
                       }"
                     >
-                      {{ guest.attending === 'yes' ? 'Confirmed' : guest.attending === 'no' ? 'Declined' : 'Pending' }}
+                      {{ guest.attending === 'yes' ? $t('dashboard.statusConfirmed') : guest.attending === 'no' ? $t('dashboard.statusDeclined') : $t('dashboard.statusPending') }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-gray-300 text-sm">{{ guest.menu || '-' }}</td>
@@ -183,10 +183,10 @@ const stats = computed(() => {
   const declined = guests.value.filter(g => g.attending === 'no').length
   const pending = guests.value.filter(g => g.attending === 'pending').length
   return [
-    { label: 'Total Invited', value: guests.value.length, color: 'text-white' },
-    { label: 'Confirmed', value: confirmed, color: 'text-sage-400' },
-    { label: 'Declined', value: declined, color: 'text-red-400' },
-    { label: 'Pending', value: pending, color: 'text-yellow-400' },
+    { labelKey: 'totalInvited', value: guests.value.length, color: 'text-white' },
+    { labelKey: 'confirmed', value: confirmed, color: 'text-sage-400' },
+    { labelKey: 'declined', value: declined, color: 'text-red-400' },
+    { labelKey: 'pending', value: pending, color: 'text-yellow-400' },
   ]
 })
 
@@ -205,7 +205,7 @@ onMounted(async () => {
     wedding.value = await weddingRes.json()
     guests.value = await guestsRes.json()
   } catch {
-    // silent
+    //
   } finally {
     loading.value = false
   }

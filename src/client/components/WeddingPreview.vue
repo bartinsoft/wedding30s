@@ -94,7 +94,7 @@
           </div>
 
           <div class="preview-scroll-indicator">
-            <span :style="{ color: colors.primary }">Scroll</span>
+            <span :style="{ color: colors.primary }">{{ $t('weddingPreview.scroll') }}</span>
             <div class="preview-scroll-arrow" :style="{ borderColor: colors.primary }"></div>
           </div>
         </section>
@@ -109,7 +109,7 @@
         </div>
 
         <section class="preview-countdown" v-if="form.date">
-          <h2 class="preview-section-script" :style="{ color: colors.text }">Countdown</h2>
+          <h2 class="preview-section-script" :style="{ color: colors.text }">{{ $t('weddingPreview.countdown') }}</h2>
           <div class="preview-countdown-grid">
             <div v-for="unit in countdownUnits" :key="unit.label" class="preview-countdown-item">
               <span class="preview-countdown-number" :style="{ color: colors.text }">{{ unit.value }}</span>
@@ -132,7 +132,7 @@
               {{ displayDate }}
             </p>
             <h2 class="preview-announcement-headline" :style="{ color: colors.text }">
-              Our Story
+              {{ $t('weddingPreview.ourStory') }}
             </h2>
             <div class="preview-announcement-body" :style="{ color: colors.textLight }" v-html="form.story"></div>
           </div>
@@ -147,7 +147,7 @@
             </svg>
           </div>
 
-          <h2 class="preview-section-script" :style="{ color: colors.text }">Day Program</h2>
+          <h2 class="preview-section-script" :style="{ color: colors.text }">{{ $t('weddingPreview.dayProgram') }}</h2>
           <p class="preview-section-subtitle" :style="{ color: colors.textLight }">
             {{ displayDate }}
           </p>
@@ -175,7 +175,7 @@
             </svg>
           </div>
 
-          <h2 class="preview-section-script" :style="{ color: colors.text }">The Menu</h2>
+          <h2 class="preview-section-script" :style="{ color: colors.text }">{{ $t('weddingPreview.theMenu') }}</h2>
 
           <div class="preview-menu-cards">
             <div
@@ -201,14 +201,14 @@
             </svg>
           </div>
 
-          <h2 class="preview-section-script" :style="{ color: colors.text }">RSVP</h2>
-          <p class="preview-section-subtitle" :style="{ color: colors.textLight }">We would love to see you there</p>
+          <h2 class="preview-section-script" :style="{ color: colors.text }">{{ $t('weddingPreview.rsvp') }}</h2>
+          <p class="preview-section-subtitle" :style="{ color: colors.textLight }">{{ $t('weddingPreview.rsvpSubtitle') }}</p>
 
           <div class="preview-rsvp-form" :style="{ borderColor: colors.accent + '20' }">
             <div class="preview-rsvp-field" :style="{ borderColor: colors.primaryLight }"></div>
             <div class="preview-rsvp-field" :style="{ borderColor: colors.primaryLight }"></div>
             <div class="preview-rsvp-btn" :style="{ background: colors.primary, color: colors.bg }">
-              Confirm Attendance
+              {{ $t('weddingPreview.confirmAttendance') }}
             </div>
           </div>
         </section>
@@ -220,7 +220,7 @@
             <span class="preview-ornament-line" :style="{ background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)` }"></span>
           </div>
 
-          <p class="preview-footer-text" :style="{ color: colors.textLight }">With all our love</p>
+          <p class="preview-footer-text" :style="{ color: colors.textLight }">{{ $t('weddingPreview.withAllOurLove') }}</p>
           <p class="preview-footer-names" :style="{ color: colors.primary }">
             {{ displayPartner1 }} & {{ displayPartner2 }}
           </p>
@@ -233,6 +233,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface ProgramEntry {
   time: string
@@ -399,9 +402,9 @@ const hasMenu = computed(() => {
 const menuCourses = computed(() => {
   const m = props.form.menu
   const courses = []
-  if (m.starter) courses.push({ label: 'Starter', icon: '🥗', value: m.starter })
-  if (m.main_course) courses.push({ label: 'Main Course', icon: '🍽️', value: m.main_course })
-  if (m.dessert) courses.push({ label: 'Dessert', icon: '🍰', value: m.dessert })
+  if (m.starter) courses.push({ label: t('weddingPreview.starter'), icon: '🥗', value: m.starter })
+  if (m.main_course) courses.push({ label: t('weddingPreview.mainCourse'), icon: '🍽️', value: m.main_course })
+  if (m.dessert) courses.push({ label: t('weddingPreview.dessert'), icon: '🍰', value: m.dessert })
   return courses
 })
 
@@ -445,10 +448,10 @@ function updateCountdown() {
 }
 
 const countdownUnits = computed(() => [
-  { value: countdown.value.days, label: 'Days' },
-  { value: countdown.value.hours, label: 'Hours' },
-  { value: countdown.value.minutes, label: 'Min' },
-  { value: countdown.value.seconds, label: 'Sec' },
+  { value: countdown.value.days, label: t('weddingPreview.days') },
+  { value: countdown.value.hours, label: t('weddingPreview.hours') },
+  { value: countdown.value.minutes, label: t('weddingPreview.min') },
+  { value: countdown.value.seconds, label: t('weddingPreview.sec') },
 ])
 
 onMounted(() => {

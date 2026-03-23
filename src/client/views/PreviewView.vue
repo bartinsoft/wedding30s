@@ -4,9 +4,9 @@
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <router-link to="/" class="font-script text-2xl text-gold-400">Wedding30s</router-link>
         <div class="flex items-center gap-4">
-          <span class="text-sm text-gray-400">Preview Mode</span>
+          <span class="text-sm text-gray-400">{{ $t('preview.previewMode') }}</span>
           <router-link to="/create" class="btn-primary text-sm py-2 px-6">
-            Create Yours
+            {{ $t('preview.createYours') }}
           </router-link>
         </div>
       </div>
@@ -15,12 +15,12 @@
     <div class="pt-24 pb-16 max-w-5xl mx-auto px-6">
       <div v-if="loading" class="text-center py-20">
         <div class="w-8 h-8 border-2 border-gold-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p class="text-gray-400 mt-4">Loading preview...</p>
+        <p class="text-gray-400 mt-4">{{ $t('preview.loadingPreview') }}</p>
       </div>
 
       <template v-else-if="wedding">
         <div class="text-center mb-8">
-          <p class="font-script text-gold-400 text-xl mb-2">Preview</p>
+          <p class="font-script text-gold-400 text-xl mb-2">{{ $t('preview.previewLabel') }}</p>
           <h1 class="font-serif text-3xl text-white">
             {{ wedding.partner1 }} & {{ wedding.partner2 }}
           </h1>
@@ -55,7 +55,7 @@
       </template>
 
       <div v-else class="text-center py-20">
-        <p class="text-gray-400">Wedding not found</p>
+        <p class="text-gray-400">{{ $t('preview.weddingNotFound') }}</p>
       </div>
     </div>
   </div>
@@ -96,7 +96,7 @@ onMounted(async () => {
     const res = await fetch(`/api/weddings/${props.id}`)
     wedding.value = await res.json()
   } catch {
-    // silent
+    //
   } finally {
     loading.value = false
   }

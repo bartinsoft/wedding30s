@@ -15,6 +15,7 @@ interface WeddingData {
   menu: string | null;
   program: string | null;
   photos?: { url: string; year: string; label?: string }[] | null;
+  language?: string;
 }
 
 interface MenuSection {
@@ -32,11 +33,91 @@ const MONTHS_ES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
-function formatDateHuman(dateStr: string): string {
+const MONTHS_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const TEMPLATE_STRINGS: Record<string, Record<string, string>> = {
+  es: {
+    countdown_days: 'Días',
+    countdown_hours: 'Horas',
+    countdown_min: 'Min',
+    countdown_sec: 'Seg',
+    scroll: 'Desliza',
+    rsvp_title: 'Confirma tu asistencia',
+    rsvp_subtitle: 'Rellena el formulario y nos lo harás saber',
+    rsvp_name_label: 'Nombre *',
+    rsvp_name_placeholder: 'Tu nombre completo',
+    rsvp_email_label: 'Email',
+    rsvp_email_placeholder: 'tu@email.com (opcional)',
+    rsvp_menu_label: 'Elección de menú',
+    rsvp_menu_placeholder: 'Selecciona tu plato...',
+    rsvp_allergies_label: 'Alergias o intolerancias',
+    rsvp_allergies_placeholder: 'Opcional',
+    rsvp_plus_one: 'Vengo con acompañante',
+    rsvp_plus_one_name: 'Nombre del acompañante',
+    rsvp_plus_one_placeholder: 'Nombre completo',
+    rsvp_message_label: 'Mensaje para los novios',
+    rsvp_message_placeholder: 'Opcional',
+    rsvp_submit: 'Confirmar asistencia',
+    rsvp_success_title: '¡Confirmación recibida!',
+    rsvp_success_text: 'Muchas gracias. ¡Nos vemos pronto!',
+    rsvp_note: 'Tu confirmación llegará directamente a los novios',
+    story_prefix: 'El próximo',
+    story_headline: '¡¡Nos casamos!!',
+    story_cta: '¡¡No faltéis!!',
+    gallery_title: 'Nuestra historia',
+    gallery_subtitle: 'Pasa las páginas de nuestro álbum',
+    footer_text: 'Con todo nuestro amor',
+    powered_by: 'Powered by wedding30s.com',
+    menu_choose: '✦ A elegir entre:',
+  },
+  en: {
+    countdown_days: 'Days',
+    countdown_hours: 'Hours',
+    countdown_min: 'Min',
+    countdown_sec: 'Sec',
+    scroll: 'Scroll',
+    rsvp_title: 'Confirm your attendance',
+    rsvp_subtitle: 'Fill in the form and let us know',
+    rsvp_name_label: 'Name *',
+    rsvp_name_placeholder: 'Your full name',
+    rsvp_email_label: 'Email',
+    rsvp_email_placeholder: 'your@email.com (optional)',
+    rsvp_menu_label: 'Menu choice',
+    rsvp_menu_placeholder: 'Select your dish...',
+    rsvp_allergies_label: 'Allergies or intolerances',
+    rsvp_allergies_placeholder: 'Optional',
+    rsvp_plus_one: 'I\'m bringing a plus one',
+    rsvp_plus_one_name: 'Plus one\'s name',
+    rsvp_plus_one_placeholder: 'Full name',
+    rsvp_message_label: 'Message for the couple',
+    rsvp_message_placeholder: 'Optional',
+    rsvp_submit: 'Confirm attendance',
+    rsvp_success_title: 'Confirmation received!',
+    rsvp_success_text: 'Thank you so much. See you soon!',
+    rsvp_note: 'Your confirmation will go directly to the couple',
+    story_prefix: 'On',
+    story_headline: 'We\'re getting married!!',
+    story_cta: 'Don\'t miss it!!',
+    gallery_title: 'Our story',
+    gallery_subtitle: 'Turn the pages of our album',
+    footer_text: 'With all our love',
+    powered_by: 'Powered by wedding30s.com',
+    menu_choose: '✦ Choose from:',
+  },
+};
+
+function formatDateHuman(dateStr: string, language: string = 'es'): string {
   const d = new Date(dateStr);
   const day = d.getDate();
-  const month = MONTHS_ES[d.getMonth()];
   const year = d.getFullYear();
+  if (language === 'en') {
+    const month = MONTHS_EN[d.getMonth()];
+    return `${month} ${day}, ${year}`;
+  }
+  const month = MONTHS_ES[d.getMonth()];
   return `${day} de ${month} de ${year}`;
 }
 
@@ -79,7 +160,7 @@ function generateMenuHtml(menuJson: string): string {
           inner += `<p class="menu-phase-note">${phase.note}</p>`;
         }
         if (phase.choose) {
-          inner += `<p class="menu-choose-label">✦ A elegir entre:</p>`;
+          inner += `<p class="menu-choose-label">{{t_menu_choose}}</p>`;
         }
         inner += `<ul class="menu-items">`;
         for (const item of phase.items) {
@@ -194,6 +275,8 @@ export function generateWeddingHtml(wedding: WeddingData): string {
   let html = fs.readFileSync(templatePath, 'utf-8');
 
   const colors = JSON.parse(wedding.colors);
+  const lang = wedding.language || 'es';
+  const t = TEMPLATE_STRINGS[lang] || TEMPLATE_STRINGS['es'];
 
   const menuHtml = wedding.menu ? generateMenuHtml(wedding.menu) : '';
   const menuOptions = wedding.menu ? generateMenuOptions(wedding.menu) : '';
@@ -208,7 +291,7 @@ export function generateWeddingHtml(wedding: WeddingData): string {
   html = html
     .replace(/\{\{partner1\}\}/g, wedding.partner1_name)
     .replace(/\{\{partner2\}\}/g, wedding.partner2_name)
-    .replace(/\{\{date_formatted\}\}/g, formatDateHuman(wedding.date))
+    .replace(/\{\{date_formatted\}\}/g, formatDateHuman(wedding.date, lang))
     .replace(/\{\{date_short\}\}/g, formatDateShort(wedding.date))
     .replace(/\{\{date_iso\}\}/g, formatDateIso(wedding.date))
     .replace(/\{\{location\}\}/g, wedding.location)
@@ -224,6 +307,10 @@ export function generateWeddingHtml(wedding: WeddingData): string {
     .replace(/\{\{color_secondary\}\}/g, colors.secondary)
     .replace(/\{\{color_bg\}\}/g, colors.bg)
     .replace(/\{\{color_text\}\}/g, colors.text);
+
+  for (const [key, value] of Object.entries(t)) {
+    html = html.replace(new RegExp(`\\{\\{t_${key}\\}\\}`, 'g'), value);
+  }
 
   const outDir = path.resolve('weddings', wedding.slug);
   fs.mkdirSync(outDir, { recursive: true });

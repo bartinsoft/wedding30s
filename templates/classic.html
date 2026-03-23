@@ -1285,25 +1285,25 @@
         <div class="countdown reveal reveal-delay-3" id="countdown">
             <div class="countdown-item">
                 <div class="countdown-number" id="cd-days">--</div>
-                <div class="countdown-label">Días</div>
+                <div class="countdown-label">{{t_countdown_days}}</div>
             </div>
             <div class="countdown-item">
                 <div class="countdown-number" id="cd-hours">--</div>
-                <div class="countdown-label">Horas</div>
+                <div class="countdown-label">{{t_countdown_hours}}</div>
             </div>
             <div class="countdown-item">
                 <div class="countdown-number" id="cd-mins">--</div>
-                <div class="countdown-label">Min</div>
+                <div class="countdown-label">{{t_countdown_min}}</div>
             </div>
             <div class="countdown-item">
                 <div class="countdown-number" id="cd-secs">--</div>
-                <div class="countdown-label">Seg</div>
+                <div class="countdown-label">{{t_countdown_sec}}</div>
             </div>
         </div>
     </div>
 
     <div class="scroll-indicator">
-        <span>Desliza</span>
+        <span>{{t_scroll}}</span>
         <div class="scroll-arrow"></div>
     </div>
 </section>
@@ -1348,12 +1348,12 @@
 {{#story}}
 <section class="announcement section">
     <div class="announcement-inner">
-        <p class="announcement-date reveal">El próximo {{date_formatted}}</p>
-        <h2 class="announcement-headline reveal reveal-delay-1">¡¡Nos casamos!!</h2>
+        <p class="announcement-date reveal">{{t_story_prefix}} {{date_formatted}}</p>
+        <h2 class="announcement-headline reveal reveal-delay-1">{{t_story_headline}}</h2>
         <div class="announcement-body reveal reveal-delay-2">
             {{story}}
         </div>
-        <p class="announcement-cta reveal reveal-delay-3">¡¡No faltéis!!</p>
+        <p class="announcement-cta reveal reveal-delay-3">{{t_story_cta}}</p>
     </div>
 </section>
 
@@ -1369,8 +1369,8 @@
 
 {{#gallery_html}}
 <section class="album-section section">
-    <h2 class="album-title reveal">Nuestra historia</h2>
-    <p class="album-subtitle reveal reveal-delay-1">Pasa las páginas de nuestro álbum</p>
+    <h2 class="album-title reveal">{{t_gallery_title}}</h2>
+    <p class="album-subtitle reveal reveal-delay-1">{{t_gallery_subtitle}}</p>
 
     <div class="album-container reveal reveal-delay-2">
         <div class="album-book" id="album-book">
@@ -1417,58 +1417,58 @@
 {{/menu_html}}
 
 <section class="form-section section">
-    <h2 class="form-section-title reveal">Confirma tu asistencia</h2>
-    <p class="form-section-subtitle reveal reveal-delay-1">Rellena el formulario y nos lo harás saber</p>
+    <h2 class="form-section-title reveal">{{t_rsvp_title}}</h2>
+    <p class="form-section-subtitle reveal reveal-delay-1">{{t_rsvp_subtitle}}</p>
 
     <div class="form-container reveal reveal-delay-2">
         <form id="rsvp-form">
             <div class="form-field">
-                <label class="form-label" for="rsvp-name">Nombre *</label>
-                <input type="text" id="rsvp-name" name="name" class="form-input" placeholder="Tu nombre completo" required>
+                <label class="form-label" for="rsvp-name">{{t_rsvp_name_label}}</label>
+                <input type="text" id="rsvp-name" name="name" class="form-input" placeholder="{{t_rsvp_name_placeholder}}" required>
             </div>
 
             <div class="form-field">
-                <label class="form-label" for="rsvp-email">Email</label>
-                <input type="email" id="rsvp-email" name="email" class="form-input" placeholder="tu@email.com (opcional)">
+                <label class="form-label" for="rsvp-email">{{t_rsvp_email_label}}</label>
+                <input type="email" id="rsvp-email" name="email" class="form-input" placeholder="{{t_rsvp_email_placeholder}}">
             </div>
 
             {{#has_menu_choices}}
             <div class="form-field">
-                <label class="form-label" for="rsvp-menu">Elección de menú</label>
+                <label class="form-label" for="rsvp-menu">{{t_rsvp_menu_label}}</label>
                 <select id="rsvp-menu" name="menu_choice" class="form-select">
-                    <option value="">Selecciona tu plato...</option>
+                    <option value="">{{t_rsvp_menu_placeholder}}</option>
                     {{menu_options}}
                 </select>
             </div>
             {{/has_menu_choices}}
 
             <div class="form-field">
-                <label class="form-label" for="rsvp-allergies">Alergias o intolerancias</label>
-                <input type="text" id="rsvp-allergies" name="allergies" class="form-input" placeholder="Opcional">
+                <label class="form-label" for="rsvp-allergies">{{t_rsvp_allergies_label}}</label>
+                <input type="text" id="rsvp-allergies" name="allergies" class="form-input" placeholder="{{t_rsvp_allergies_placeholder}}">
             </div>
 
             <div class="form-checkbox-row">
                 <input type="checkbox" id="rsvp-plus-one" name="plus_one" onchange="togglePlusOne(this)">
-                <label for="rsvp-plus-one">Vengo con acompañante</label>
+                <label for="rsvp-plus-one">{{t_rsvp_plus_one}}</label>
             </div>
 
             <div class="plus-one-fields" id="plus-one-fields">
                 <div class="form-field">
-                    <label class="form-label" for="rsvp-plus-one-name">Nombre del acompañante</label>
-                    <input type="text" id="rsvp-plus-one-name" name="plus_one_name" class="form-input" placeholder="Nombre completo">
+                    <label class="form-label" for="rsvp-plus-one-name">{{t_rsvp_plus_one_name}}</label>
+                    <input type="text" id="rsvp-plus-one-name" name="plus_one_name" class="form-input" placeholder="{{t_rsvp_plus_one_placeholder}}">
                 </div>
             </div>
 
             <div class="form-field">
-                <label class="form-label" for="rsvp-message">Mensaje para los novios</label>
-                <textarea id="rsvp-message" name="message" class="form-textarea" placeholder="Opcional"></textarea>
+                <label class="form-label" for="rsvp-message">{{t_rsvp_message_label}}</label>
+                <textarea id="rsvp-message" name="message" class="form-textarea" placeholder="{{t_rsvp_allergies_placeholder}}"></textarea>
             </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/>
                 </svg>
-                <span>Confirmar asistencia</span>
+                <span>{{t_rsvp_submit}}</span>
             </button>
 
             <div class="rsvp-error" id="rsvp-error"></div>
@@ -1476,11 +1476,11 @@
 
         <div class="rsvp-success" id="rsvp-success">
             <div class="rsvp-success-icon">💒</div>
-            <p class="rsvp-success-title">¡Confirmación recibida!</p>
-            <p class="rsvp-success-text">Muchas gracias. ¡Nos vemos pronto!</p>
+            <p class="rsvp-success-title">{{t_rsvp_success_title}}</p>
+            <p class="rsvp-success-text">{{t_rsvp_success_text}}</p>
         </div>
 
-        <p class="form-note">Tu confirmación llegará directamente a los novios</p>
+        <p class="form-note">{{t_rsvp_note}}</p>
     </div>
 </section>
 
@@ -1490,12 +1490,12 @@
         <span class="ornament-diamond"></span>
         <span class="ornament-line"></span>
     </div>
-    <p class="footer-text reveal reveal-delay-1">Con todo nuestro amor</p>
+    <p class="footer-text reveal reveal-delay-1">{{t_footer_text}}</p>
     <p class="footer-names reveal reveal-delay-2">{{partner1}} & {{partner2}}</p>
     <p class="footer-date-bottom reveal reveal-delay-3">{{date_formatted}}</p>
 
     <div class="powered-by">
-        <a href="https://wedding30s.com" target="_blank" rel="noopener">Powered by wedding30s.com</a>
+        <a href="https://wedding30s.com" target="_blank" rel="noopener">{{t_powered_by}}</a>
     </div>
 </footer>
 

@@ -4,7 +4,13 @@
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <router-link to="/" class="font-script text-2xl text-gold-400">Wedding30s</router-link>
         <div class="flex items-center gap-4">
-          <span class="text-sm text-gray-400">Step {{ currentStep }} of 4</span>
+          <button
+            @click="toggleLocale"
+            class="text-sm text-gray-400 hover:text-gold-400 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-gold-400/30"
+          >
+            {{ $i18n.locale === 'en' ? 'ES' : 'EN' }}
+          </button>
+          <span class="text-sm text-gray-400">{{ $t('create.stepOf', { current: currentStep, total: 4 }) }}</span>
         </div>
       </div>
     </nav>
@@ -37,33 +43,58 @@
           <div :class="currentStep === 4 ? 'w-full' : 'lg:w-[58%] w-full'">
             <transition name="slide" mode="out-in">
               <div v-if="currentStep === 1" key="step1">
-                <h2 class="section-title text-white mb-2">Names & Date</h2>
-                <p class="text-gray-400 mb-10">Tell us about your big day</p>
+                <h2 class="section-title text-white mb-2">{{ $t('create.namesDate') }}</h2>
+                <p class="text-gray-400 mb-10">{{ $t('create.namesDateSubtitle') }}</p>
 
                 <div class="space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-4">{{ $t('create.websiteLanguage') }}</label>
+                    <div class="flex gap-3">
+                      <button
+                        @click="form.language = 'en'"
+                        class="flex-1 py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all duration-300"
+                        :class="form.language === 'en'
+                          ? 'border-gold-400 bg-gold-500/10 text-gold-400'
+                          : 'border-white/10 text-gray-400 hover:border-white/20'"
+                      >
+                        🇬🇧 {{ $t('create.english') }}
+                      </button>
+                      <button
+                        @click="form.language = 'es'"
+                        class="flex-1 py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all duration-300"
+                        :class="form.language === 'es'
+                          ? 'border-gold-400 bg-gold-500/10 text-gold-400'
+                          : 'border-white/10 text-gray-400 hover:border-white/20'"
+                      >
+                        🇪🇸 {{ $t('create.spanish') }}
+                      </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">{{ $t('create.websiteLanguageHelp') }}</p>
+                  </div>
+
                   <div class="grid sm:grid-cols-2 gap-6">
                     <div>
-                      <label class="block text-sm font-medium text-gray-300 mb-2">Partner 1</label>
+                      <label class="block text-sm font-medium text-gray-300 mb-2">{{ $t('create.partner1') }}</label>
                       <input
                         v-model="form.partner1"
                         type="text"
-                        placeholder="First name"
+                        :placeholder="$t('create.firstName')"
                         class="form-input-field"
                       />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-300 mb-2">Partner 2</label>
+                      <label class="block text-sm font-medium text-gray-300 mb-2">{{ $t('create.partner2') }}</label>
                       <input
                         v-model="form.partner2"
                         type="text"
-                        placeholder="First name"
+                        :placeholder="$t('create.firstName')"
                         class="form-input-field"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Wedding Date</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">{{ $t('create.weddingDate') }}</label>
                     <input
                       v-model="form.date"
                       type="date"
@@ -72,47 +103,47 @@
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">{{ $t('create.location') }}</label>
                     <input
                       v-model="form.location"
                       type="text"
-                      placeholder="City, Country"
+                      :placeholder="$t('create.locationPlaceholder')"
                       class="form-input-field"
                     />
                   </div>
 
                   <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">
-                      Venue Name
-                      <span class="text-gray-600 font-normal">(optional)</span>
+                      {{ $t('create.venueName') }}
+                      <span class="text-gray-600 font-normal">{{ $t('create.venueNameOptional') }}</span>
                     </label>
                     <input
                       v-model="form.venue"
                       type="text"
-                      placeholder="e.g. Villa Cora"
+                      :placeholder="$t('create.venuePlaceholder')"
                       class="form-input-field"
                     />
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">{{ $t('create.email') }}</label>
                     <input
                       v-model="form.email"
                       type="email"
-                      placeholder="your@email.com"
+                      :placeholder="$t('create.emailPlaceholder')"
                       class="form-input-field"
                     />
-                    <p class="text-xs text-gray-500 mt-2">For RSVP notifications and managing your website</p>
+                    <p class="text-xs text-gray-500 mt-2">{{ $t('create.emailHelp') }}</p>
                   </div>
                 </div>
               </div>
 
               <div v-else-if="currentStep === 2" key="step2">
-                <h2 class="section-title text-white mb-2">Choose Your Style</h2>
-                <p class="text-gray-400 mb-10">Pick a template and colors that match your vibe</p>
+                <h2 class="section-title text-white mb-2">{{ $t('create.chooseStyle') }}</h2>
+                <p class="text-gray-400 mb-10">{{ $t('create.chooseStyleSubtitle') }}</p>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-300 mb-4">Template</label>
+                  <label class="block text-sm font-medium text-gray-300 mb-4">{{ $t('create.template') }}</label>
                   <div class="grid grid-cols-2 gap-4">
                     <div
                       v-for="tpl in templateOptions"
@@ -162,7 +193,7 @@
                 </div>
 
                 <div class="mt-10">
-                  <label class="block text-sm font-medium text-gray-300 mb-4">Color Palette</label>
+                  <label class="block text-sm font-medium text-gray-300 mb-4">{{ $t('create.colorPalette') }}</label>
                   <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
                     <div
                       v-for="palette in palettes"
@@ -194,8 +225,8 @@
 
                 <div class="mt-10">
                   <label class="block text-sm font-medium text-gray-300 mb-2">
-                    Couple Photo
-                    <span class="text-gray-600 font-normal">(optional)</span>
+                    {{ $t('create.couplePhoto') }}
+                    <span class="text-gray-600 font-normal">{{ $t('create.couplePhotoOptional') }}</span>
                   </label>
                   <div
                     class="border-2 border-dashed border-white/10 rounded-xl p-8 text-center
@@ -208,7 +239,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                               d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <p class="text-gray-500 mt-3 text-sm">Click to upload a photo</p>
+                      <p class="text-gray-500 mt-3 text-sm">{{ $t('create.clickToUpload') }}</p>
                     </div>
                     <img v-else :src="form.photoPreview" class="w-32 h-32 mx-auto rounded-xl object-cover" />
                   </div>
@@ -216,30 +247,32 @@
               </div>
 
               <div v-else-if="currentStep === 3" key="step3">
-                <h2 class="section-title text-white mb-2">Your Content</h2>
-                <p class="text-gray-400 mb-10">Add details your guests will love (all optional)</p>
+                <h2 class="section-title text-white mb-2">{{ $t('create.yourContent') }}</h2>
+                <p class="text-gray-400 mb-10">{{ $t('create.yourContentSubtitle') }}</p>
 
                 <div class="space-y-8">
                   <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Your Story</label>
-                    <RichTextEditor
+                    <label class="block text-sm font-medium text-gray-300 mb-2">{{ $t('create.yourStory') }}</label>
+                    <textarea
                       v-model="form.story"
-                      placeholder="How did you meet? Share your love story..."
-                    />
+                      rows="4"
+                      :placeholder="$t('create.yourStoryPlaceholder')"
+                      class="form-input-field resize-none"
+                    ></textarea>
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-4">Menu</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-4">{{ $t('create.menu') }}</label>
                     <div class="space-y-4">
                       <div v-for="course in menuCoursesDef" :key="course.key" class="relative">
                         <div class="flex items-center gap-2 mb-1.5">
                           <span class="text-base">{{ course.icon }}</span>
-                          <label class="text-xs text-gray-400 font-medium uppercase tracking-wider">{{ course.label }}</label>
+                          <label class="text-xs text-gray-400 font-medium uppercase tracking-wider">{{ $t('create.' + course.labelKey) }}</label>
                         </div>
                         <input
                           v-model="(form.menu as Record<string, string>)[course.key]"
                           type="text"
-                          :placeholder="course.placeholder"
+                          :placeholder="$t('create.' + course.placeholderKey)"
                           class="form-input-field"
                         />
                       </div>
@@ -248,12 +281,12 @@
 
                   <div>
                     <div class="flex items-center justify-between mb-4">
-                      <label class="block text-sm font-medium text-gray-300">Day Program</label>
+                      <label class="block text-sm font-medium text-gray-300">{{ $t('create.dayProgram') }}</label>
                       <button @click="addProgramEntry" class="text-sm text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Add Entry
+                        {{ $t('create.addEntry') }}
                       </button>
                     </div>
                     <div class="space-y-3">
@@ -274,7 +307,7 @@
                           <input
                             v-model="entry.description"
                             type="text"
-                            placeholder="e.g. Ceremony begins"
+                            :placeholder="$t('create.programPlaceholder')"
                             class="flex-1 form-input-field"
                           />
                           <button
@@ -288,7 +321,7 @@
                         </div>
                       </transition-group>
                       <div v-if="form.program.length === 0" class="text-center py-8 text-gray-600 text-sm">
-                        No entries yet. Click "Add Entry" to build your program.
+                        {{ $t('create.noProgramEntries') }}
                       </div>
                     </div>
                   </div>
@@ -296,8 +329,8 @@
               </div>
 
               <div v-else-if="currentStep === 4" key="step4">
-                <h2 class="section-title text-white mb-2">Preview & Publish</h2>
-                <p class="text-gray-400 mb-6">Your wedding website is ready! Scroll through the preview below.</p>
+                <h2 class="section-title text-white mb-2">{{ $t('create.previewPublish') }}</h2>
+                <p class="text-gray-400 mb-6">{{ $t('create.previewPublishSubtitle') }}</p>
 
                 <div class="mb-8">
                   <WeddingPreview :form="form" :full-width="true" />
@@ -305,26 +338,26 @@
 
                 <div class="max-w-xl mx-auto space-y-6">
                   <div class="p-6 rounded-2xl bg-gray-900/50 border border-white/5">
-                    <h3 class="font-serif text-xl text-white mb-4">Summary</h3>
+                    <h3 class="font-serif text-xl text-white mb-4">{{ $t('create.summary') }}</h3>
                     <dl class="space-y-3 text-sm">
                       <div class="flex justify-between">
-                        <dt class="text-gray-400">Couple</dt>
+                        <dt class="text-gray-400">{{ $t('create.couple') }}</dt>
                         <dd class="text-white">{{ form.partner1 }} & {{ form.partner2 }}</dd>
                       </div>
                       <div class="flex justify-between">
-                        <dt class="text-gray-400">Date</dt>
+                        <dt class="text-gray-400">{{ $t('create.date') }}</dt>
                         <dd class="text-white">{{ formattedDate }}</dd>
                       </div>
                       <div class="flex justify-between">
-                        <dt class="text-gray-400">Location</dt>
+                        <dt class="text-gray-400">{{ $t('create.locationLabel') }}</dt>
                         <dd class="text-white">{{ form.location }}</dd>
                       </div>
                       <div v-if="form.venue" class="flex justify-between">
-                        <dt class="text-gray-400">Venue</dt>
+                        <dt class="text-gray-400">{{ $t('create.venue') }}</dt>
                         <dd class="text-white">{{ form.venue }}</dd>
                       </div>
                       <div class="flex justify-between">
-                        <dt class="text-gray-400">Style</dt>
+                        <dt class="text-gray-400">{{ $t('create.style') }}</dt>
                         <dd class="text-white">
                           {{ templateOptions.find(t => t.id === form.template)?.name }}
                           &middot;
@@ -344,10 +377,10 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                       </svg>
-                      Publishing...
+                      {{ $t('create.publishing') }}
                     </span>
                     <span v-else>
-                      Publish for &euro;29
+                      {{ $t('create.publishFor') }}
                       <svg class="ml-2 w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
@@ -358,7 +391,7 @@
                     @click="sharePreview"
                     class="w-full btn-secondary py-3"
                   >
-                    Share Preview Link (Free)
+                    {{ $t('create.sharePreviewLink') }}
                   </button>
                 </div>
               </div>
@@ -373,7 +406,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                Back
+                {{ $t('create.back') }}
               </button>
               <div v-else></div>
 
@@ -387,10 +420,10 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                   </svg>
-                  Saving...
+                  {{ $t('create.saving') }}
                 </span>
                 <span v-else class="flex items-center gap-2">
-                  Continue
+                  {{ $t('create.continue') }}
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
@@ -401,14 +434,14 @@
 
           <div v-if="currentStep < 4" class="hidden lg:block lg:w-[42%]">
             <div class="sticky top-28">
-              <p class="text-sm text-gray-500 mb-4 text-center font-sans tracking-wide">Live Preview</p>
+              <p class="text-sm text-gray-500 mb-4 text-center font-sans tracking-wide">{{ $t('create.livePreview') }}</p>
               <WeddingPreview :form="form" />
             </div>
           </div>
         </div>
 
         <div v-if="currentStep < 4" class="lg:hidden mt-12">
-          <p class="text-sm text-gray-500 mb-4 text-center">Preview</p>
+          <p class="text-sm text-gray-500 mb-4 text-center">{{ $t('create.preview') }}</p>
           <WeddingPreview :form="form" />
         </div>
       </div>
@@ -419,15 +452,21 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { setLocale } from '@/i18n'
 import WeddingPreview from '@/components/WeddingPreview.vue'
-import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 const currentStep = ref(1)
 const isPublishing = ref(false)
 const isSaving = ref(false)
 const weddingId = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+
+function toggleLocale() {
+  setLocale(locale.value === 'en' ? 'es' : 'en')
+}
 
 const form = ref({
   partner1: '',
@@ -441,6 +480,7 @@ const form = ref({
   photo: null as File | null,
   photoPreview: '',
   story: '',
+  language: 'es',
   menu: {
     starter: '',
     main_course: '',
@@ -502,13 +542,13 @@ const palettes = [
 ]
 
 const menuCoursesDef = [
-  { key: 'starter', label: 'Starter', icon: '🥗', placeholder: 'e.g. Burrata with heirloom tomatoes' },
-  { key: 'main_course', label: 'Main Course', icon: '🍽️', placeholder: 'e.g. Pan-seared salmon with asparagus' },
-  { key: 'dessert', label: 'Dessert', icon: '🍰', placeholder: 'e.g. Tiramisu with fresh berries' },
+  { key: 'starter', labelKey: 'starter', icon: '🥗', placeholderKey: 'starterPlaceholder' },
+  { key: 'main_course', labelKey: 'mainCourse', icon: '🍽️', placeholderKey: 'mainCoursePlaceholder' },
+  { key: 'dessert', labelKey: 'dessert', icon: '🍰', placeholderKey: 'dessertPlaceholder' },
 ]
 
 const formattedDate = computed(() => {
-  if (!form.value.date) return 'Your Wedding Date'
+  if (!form.value.date) return t('create.yourWeddingDate')
   return new Date(form.value.date + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -588,6 +628,7 @@ async function saveWedding() {
       template: form.value.template,
       palette: form.value.palette,
       story: form.value.story,
+      language: form.value.language,
       menu: form.value.menu,
       program: form.value.program,
     }
