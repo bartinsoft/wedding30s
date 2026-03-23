@@ -28,6 +28,7 @@ jobs:
 
       - name: Create deployment package
         run: |
+          mkdir -p public
           tar -czf deploy.tar.gz \
             --exclude='public/uploads' \
             dist/ \
