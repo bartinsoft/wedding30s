@@ -382,6 +382,30 @@
             font-weight: 600;
         }
 
+        .announcement-body a {
+            color: var(--primary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--primary);
+            transition: opacity 0.3s ease;
+        }
+
+        .announcement-body a:hover {
+            opacity: 0.75;
+        }
+
+        .announcement-body a[href*="maps.google"]::before,
+        .announcement-body a[href*="maps.app.goo.gl"]::before {
+            content: "\uD83D\uDCCD ";
+        }
+
+        .announcement-body a[href^="tel:"]::before {
+            content: "\uD83D\uDCDE ";
+        }
+
+        .announcement-body a[href^="mailto:"]::before {
+            content: "\u2709\uFE0F ";
+        }
+
         .venue-link {
             color: var(--text);
             text-decoration: none;

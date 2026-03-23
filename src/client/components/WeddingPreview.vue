@@ -134,9 +134,7 @@
             <h2 class="preview-announcement-headline" :style="{ color: colors.text }">
               Our Story
             </h2>
-            <p class="preview-announcement-body" :style="{ color: colors.textLight }">
-              {{ form.story }}
-            </p>
+            <div class="preview-announcement-body" :style="{ color: colors.textLight }" v-html="form.story"></div>
           </div>
         </section>
 
@@ -820,6 +818,25 @@ onUnmounted(() => {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.9rem;
   line-height: 1.9;
+}
+
+.preview-announcement-body :deep(a) {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+.preview-announcement-body :deep(a[href*="maps.google"])::before,
+.preview-announcement-body :deep(a[href*="maps.app.goo.gl"])::before {
+  content: "\uD83D\uDCCD ";
+}
+
+.preview-announcement-body :deep(a[href^="tel:"])::before {
+  content: "\uD83D\uDCDE ";
+}
+
+.preview-announcement-body :deep(a[href^="mailto:"])::before {
+  content: "\u2709\uFE0F ";
 }
 
 .preview-program {

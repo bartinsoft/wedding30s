@@ -222,12 +222,10 @@
                 <div class="space-y-8">
                   <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Your Story</label>
-                    <textarea
+                    <RichTextEditor
                       v-model="form.story"
-                      rows="4"
                       placeholder="How did you meet? Share your love story..."
-                      class="form-input-field resize-none"
-                    ></textarea>
+                    />
                   </div>
 
                   <div>
@@ -422,6 +420,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import WeddingPreview from '@/components/WeddingPreview.vue'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const router = useRouter()
 const currentStep = ref(1)
