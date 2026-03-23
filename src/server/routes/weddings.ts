@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import path from 'node:path';
 import fs from 'node:fs';
 import db from '../db/index.js';
+import { generateWeddingHtml } from '../generator.js';
 
 const router = Router();
 
@@ -167,6 +168,38 @@ router.post('/api/weddings/:id/publish', async (req, res) => {
     res.json({ url: session.url });
   } catch (err) {
     res.status(500).json({ error: 'Failed to create checkout session' });
+  }
+});
+
+router.post('/api/weddings/:id/publish-free', (req, res) => {
+  try {
+    const wedding = db.prepare('SELECT * FROM weddings WHERE id = ?').get(req.params.id) as Record<string, string> | undefined;
+    if (!wedding) {
+      res.status(404).json({ error: 'Wedding not found' });
+      return;
+    }
+
+    db.prepare("UPDATE weddings SET status = 'published', updated_at = datetime('now') WHERE id = ?").run(wedding.id);
+
+    generateWeddingHtml({
+      slug: wedding.slug,
+      partner1_name: wedding.partner1_name,
+      partner2_name: wedding.partner2_name,
+      date: wedding.date,
+      location: wedding.location,
+      venue: wedding.venue || null,
+      template: wedding.template,
+      colors: wedding.colors,
+      photo_url: wedding.photo_url || null,
+      story: wedding.story || null,
+      menu: wedding.menu || null,
+      program: wedding.program || null,
+    });
+
+    res.json({ url: `/${wedding.slug}` });
+  } catch (err) {
+    console.error('Failed to publish wedding:', err);
+    res.status(500).json({ error: 'Failed to publish wedding' });
   }
 });
 

@@ -4,6 +4,10 @@ import fs from 'node:fs';
 import weddingsRouter from './routes/weddings.js';
 import webhooksRouter from './routes/webhooks.js';
 
+for (const dir of ['data', 'public/uploads/tmp', 'weddings', 'templates']) {
+  fs.mkdirSync(path.resolve(dir), { recursive: true });
+}
+
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
 
