@@ -1,0 +1,101 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Build client and server
+        run: |
+          npm ci
+          npm run build
+
+      - name: Create deployment package
+        run: |
+          tar -czf deploy.tar.gz \
+            --exclude='public/uploads' \
+            dist/ \
+            templates/ \
+            public/ \
+            package.json \
+            package-lock.json \
+            Dockerfile
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "deploy.tar.gz"
+          target: "/tmp/"
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+
+            PROJECT_DIR="/data/projects/wedding30s"
+
+            sudo mkdir -p $PROJECT_DIR
+            sudo chown -R $USER:$USER $PROJECT_DIR
+            cd $PROJECT_DIR
+
+            rm -rf dist/ templates/ public/css public/js public/assets Dockerfile package.json package-lock.json
+
+            tar -xzf /tmp/deploy.tar.gz -C $PROJECT_DIR
+            rm /tmp/deploy.tar.gz
+
+            docker build -t wedding30s .
+
+            docker stop wedding30s || true
+            docker rm wedding30s || true
+
+            docker run -d \
+              --name wedding30s \
+              --restart unless-stopped \
+              --network host \
+              -v /data/projects/wedding30s/data:/app/data \
+              -v /data/projects/wedding30s/weddings:/app/weddings \
+              -v /data/projects/wedding30s/public/uploads:/app/public/uploads \
+              -e NODE_ENV=production \
+              -e PORT=3200 \
+              -e BASE_URL=https://wedding30s.com \
+              wedding30s
+
+            docker image prune -f
+
+            echo "Deploy completado!"
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            sleep 5
+            curl -sf http://localhost:3200 && echo "Health check: OK" || echo "Health check: FAIL"
