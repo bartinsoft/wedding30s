@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{partner1}} & {{partner2}} - ¡Nos Casamos!</title>
+    <meta name="description" content="{{partner1}} & {{partner2}} - {{date_formatted}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sage: #7A8B5E;
+            --sage-light: #9BAF7C;
+            --sage-dark: #5C6B45;
+            --gold: #C4A35A;
+            --gold-light: #D4BA7A;
+            --gold-dark: #A8883E;
+            --blue: #A3B5C7;
+            --blue-light: #C5D4E0;
+            --silver: #B8BFC6;
+            --silver-light: #D0D5DA;
+            --cream: #FDFBF7;
+            --cream-dark: #F4EFE5;
+            --charcoal: #2C3E2D;
+            --charcoal-light: #4A5E4B;
+            --rose: #D4A0A0;
+            --rose-light: #E8C4C4;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background-color: var(--cream);
+            color: var(--charcoal);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.03;
+            background-image:
+                radial-gradient(circle at 20% 50%, var(--sage) 1px, transparent 1px),
+                radial-gradient(circle at 80% 20%, var(--gold) 1px, transparent 1px),
+                radial-gradient(circle at 60% 80%, var(--sage) 1px, transparent 1px);
+            background-size: 60px 60px, 80px 80px, 70px 70px;
+        }
+
+        .section {
+            position: relative;
+            z-index: 1;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.15s; }
+        .reveal-delay-2 { transition-delay: 0.3s; }
+        .reveal-delay-3 { transition-delay: 0.45s; }
+        .reveal-delay-4 { transition-delay: 0.6s; }
+
+        /* ============ HERO ============ */
+
+        .hero {
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 1.5rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(122, 139, 94, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(196, 163, 90, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(163, 181, 199, 0.05) 0%, transparent 60%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hero-date-top {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(0.75rem, 2vw, 0.9rem);
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--sage);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .hero-names {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(3rem, 10vw, 7rem);
+            color: var(--charcoal);
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .hero-names .ampersand {
+            display: block;
+            font-size: 0.5em;
+            color: var(--gold);
+            line-height: 1.8;
+        }
+
+        .hero-date {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            letter-spacing: 0.15em;
+            color: var(--charcoal-light);
+            margin-top: 1.5rem;
+            font-weight: 400;
+        }
+
+        .ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .ornament-line {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .ornament-diamond {
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            transform: rotate(45deg);
+            flex-shrink: 0;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: gentleBounce 2.5s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        .scroll-indicator span {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--sage);
+            opacity: 0.6;
+        }
+
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 1.5px solid var(--sage);
+            border-bottom: 1.5px solid var(--sage);
+            transform: rotate(45deg);
+            opacity: 0.4;
+        }
+
+        @keyframes gentleBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        .wedding-deco {
+            position: absolute;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .branch-1 {
+            top: -3%;
+            left: -1%;
+            height: clamp(400px, 75vh, 700px);
+            width: auto;
+            opacity: 0.45;
+            animation: swayBranch1 7s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        .branch-2 {
+            top: -3%;
+            right: -1%;
+            height: clamp(380px, 70vh, 660px);
+            width: auto;
+            opacity: 0.45;
+            animation: swayBranch2 8s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        .rings-deco {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: clamp(40px, 6vw, 60px);
+            opacity: 0;
+            animation: ringsAppear 3s ease-out 1.5s forwards, ringsFloat 4s ease-in-out 4.5s infinite;
+            z-index: 0;
+        }
+
+        .petal {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .petal-1 { width: 22px; height: 22px; top: 10%; left: 12%; animation: fallingPetal1 9s ease-in-out 1s infinite; }
+        .petal-2 { width: 18px; height: 18px; top: 5%; left: 42%; animation: fallingPetal2 10s ease-in-out 3s infinite; }
+        .petal-3 { width: 24px; height: 24px; top: 3%; right: 18%; animation: fallingPetal1 8s ease-in-out 0.5s infinite; }
+        .petal-4 { width: 17px; height: 17px; top: 15%; right: 30%; animation: fallingPetal2 11s ease-in-out 4.5s infinite; }
+        .petal-5 { width: 20px; height: 20px; top: 2%; left: 65%; animation: fallingPetal1 9.5s ease-in-out 2s infinite; }
+        .petal-6 { width: 22px; height: 22px; top: 8%; left: 25%; animation: fallingPetal2 8.5s ease-in-out 5.5s infinite; }
+        .petal-7 { width: 16px; height: 16px; top: 6%; right: 50%; animation: fallingPetal1 10.5s ease-in-out 7s infinite; }
+        .petal-8 { width: 19px; height: 19px; top: 12%; left: 80%; animation: fallingPetal2 9s ease-in-out 3.5s infinite; }
+
+        @keyframes swayBranch1 {
+            0%, 100% { transform: rotate(0deg) translateX(0); }
+            25% { transform: rotate(1.5deg) translateX(3px); }
+            50% { transform: rotate(-1deg) translateX(-2px); }
+            75% { transform: rotate(0.5deg) translateX(1px); }
+        }
+
+        @keyframes swayBranch2 {
+            0%, 100% { transform: scaleX(-1) rotate(0deg) translateX(0); }
+            25% { transform: scaleX(-1) rotate(-1.5deg) translateX(-3px); }
+            50% { transform: scaleX(-1) rotate(1deg) translateX(2px); }
+            75% { transform: scaleX(-1) rotate(-0.5deg) translateX(-1px); }
+        }
+
+        @keyframes ringsAppear {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            100% { opacity: 0.08; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes ringsFloat {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) rotate(5deg) translateY(-3px); }
+        }
+
+        @keyframes fallingPetal1 {
+            0% { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg); }
+            8% { opacity: 0.7; }
+            30% { opacity: 0.6; transform: translateY(calc(20vh)) translateX(25px) rotate(90deg); }
+            60% { opacity: 0.45; transform: translateY(calc(45vh)) translateX(-15px) rotate(200deg); }
+            85% { opacity: 0.25; }
+            100% { opacity: 0; transform: translateY(calc(75vh)) translateX(30px) rotate(380deg); }
+        }
+
+        @keyframes fallingPetal2 {
+            0% { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg); }
+            8% { opacity: 0.65; }
+            30% { opacity: 0.55; transform: translateY(calc(18vh)) translateX(-20px) rotate(-80deg); }
+            60% { opacity: 0.4; transform: translateY(calc(42vh)) translateX(20px) rotate(-190deg); }
+            85% { opacity: 0.2; }
+            100% { opacity: 0; transform: translateY(calc(70vh)) translateX(-25px) rotate(-360deg); }
+        }
+
+        /* ============ ANNOUNCEMENT ============ */
+
+        .announcement {
+            padding: 5rem 1.5rem;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(180deg, transparent 0%, rgba(122, 139, 94, 0.04) 30%, rgba(122, 139, 94, 0.04) 70%, transparent 100%);
+        }
+
+        .announcement-inner {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .announcement-date {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            color: var(--charcoal-light);
+            font-weight: 400;
+            font-style: italic;
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        }
+
+        .announcement-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            color: var(--charcoal);
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            line-height: 1.2;
+        }
+
+        .announcement-body {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+            line-height: 1.9;
+            color: var(--charcoal-light);
+            font-weight: 400;
+        }
+
+        .announcement-body strong {
+            color: var(--charcoal);
+            font-weight: 600;
+        }
+
+        .venue-link {
+            color: var(--charcoal);
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px dashed var(--gold-light);
+            padding-bottom: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .venue-link:hover {
+            color: var(--sage-dark);
+            border-bottom-color: var(--sage);
+            border-bottom-style: solid;
+        }
+
+        .venue-link .pin-icon {
+            display: inline-block;
+            width: 0.85em;
+            height: 0.85em;
+            vertical-align: -0.05em;
+            margin-left: 0.2em;
+            opacity: 0.45;
+            transition: opacity 0.3s ease;
+        }
+
+        .venue-link:hover .pin-icon {
+            opacity: 0.8;
+        }
+
+        .announcement-cta {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            color: var(--sage-dark);
+            font-weight: 700;
+            margin-top: 2.5rem;
+            font-style: italic;
+        }
+
+        /* ============ ALBUM SECTION ============ */
+
+        .album-section {
+            padding: 3rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .album-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--charcoal);
+            margin-bottom: 0.3rem;
+        }
+
+        .album-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+            color: var(--charcoal-light);
+            font-style: italic;
+            margin-bottom: 2rem;
+        }
+
+        .album-container {
+            position: relative;
+            max-width: 420px;
+            margin: 0 auto;
+            perspective: 1200px;
+        }
+
+        .album-book {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3/4;
+            transform-style: preserve-3d;
+        }
+
+        .album-page {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.4s ease;
+            transform-origin: left center;
+            background: white;
+            border-radius: 4px 12px 12px 4px;
+            box-shadow: 0 4px 20px rgba(44, 62, 45, 0.1), 2px 0 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .album-page.flipped {
+            transform: rotateY(-180deg);
+            pointer-events: none;
+        }
+
+        .album-page.behind {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .album-page-inner {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 14px 14px 0;
+        }
+
+        .album-page-img {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            object-fit: cover;
+            border-radius: 3px;
+            display: block;
+        }
+
+        .album-page-footer {
+            flex-shrink: 0;
+            padding: 0.5rem 0;
+            text-align: center;
+        }
+
+        .album-page-year {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            color: var(--gold-dark);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .album-page-label {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+            color: var(--sage);
+            margin-top: 0.1rem;
+        }
+
+        .album-page::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0,0,0,0.06) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .album-page:last-child::after {
+            display: none;
+        }
+
+        .album-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .album-nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid var(--cream-dark);
+            background: white;
+            color: var(--charcoal-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .album-nav-btn:hover {
+            border-color: var(--sage-light);
+            color: var(--sage);
+            background: rgba(122, 139, 94, 0.05);
+        }
+
+        .album-nav-btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        .album-nav-btn:disabled:hover {
+            border-color: var(--cream-dark);
+            color: var(--charcoal-light);
+            background: white;
+        }
+
+        .album-dots {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .album-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--cream-dark);
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .album-dot.active {
+            background: var(--gold);
+            transform: scale(1.3);
+        }
+
+        .album-hint {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            color: var(--charcoal-light);
+            opacity: 0.4;
+            font-style: italic;
+            margin-top: 1rem;
+        }
+
+        /* ============ MENU ============ */
+
+        .menu-section {
+            padding: 4rem 1.5rem 3rem;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(180deg, transparent 0%, rgba(122, 139, 94, 0.04) 30%, rgba(122, 139, 94, 0.04) 70%, transparent 100%);
+        }
+
+        .menu-section-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(2rem, 6vw, 3rem);
+            color: var(--charcoal);
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-section-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            color: var(--charcoal-light);
+            font-style: italic;
+            margin-bottom: 2.5rem;
+        }
+
+        .menu-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 4px 20px rgba(44, 62, 45, 0.06), 0 1px 4px rgba(44, 62, 45, 0.04);
+            border: 1px solid rgba(196, 163, 90, 0.15);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--sage-light), var(--gold-light), var(--sage-light));
+            opacity: 0.6;
+        }
+
+        .menu-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .menu-card-icon {
+            font-size: 1.6rem;
+        }
+
+        .menu-card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 3.5vw, 1.6rem);
+            color: var(--charcoal);
+            font-weight: 600;
+        }
+
+        .menu-phase {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            color: var(--sage-dark);
+            font-weight: 600;
+            font-style: italic;
+            margin: 1.2rem 0 0.4rem;
+        }
+
+        .menu-phase-note {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            color: var(--charcoal-light);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            opacity: 0.7;
+        }
+
+        .menu-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu-items li {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+            color: var(--charcoal-light);
+            padding: 0.35rem 0;
+            padding-left: 1.2rem;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .menu-items li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold-light);
+            transform: translateY(-50%);
+        }
+
+        .menu-items li small {
+            color: var(--charcoal-light);
+            opacity: 0.6;
+            font-size: 0.9em;
+        }
+
+        .menu-interlude {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            color: var(--sage);
+            font-style: italic;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .menu-extras {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+            color: var(--charcoal-light);
+            text-align: center;
+            margin-top: 1rem;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .menu-choose-label {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(0.9rem, 2.2vw, 1rem);
+            color: var(--gold-dark);
+            font-weight: 600;
+            margin: 1rem 0 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* ============ FORM ============ */
+
+        .form-section {
+            padding: 3rem 1.5rem 4rem;
+            text-align: center;
+        }
+
+        .form-section-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--charcoal);
+            margin-bottom: 0.3rem;
+        }
+
+        .form-section-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+            color: var(--charcoal-light);
+            font-style: italic;
+            margin-bottom: 2rem;
+        }
+
+        .form-container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .guest-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 12px rgba(44, 62, 45, 0.05);
+            border: 1px solid rgba(196, 163, 90, 0.12);
+            text-align: left;
+            position: relative;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .guest-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .guest-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.85rem;
+            color: var(--sage);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .guest-remove {
+            background: none;
+            border: none;
+            color: var(--rose);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            line-height: 1;
+            opacity: 0.5;
+        }
+
+        .guest-remove:hover {
+            opacity: 1;
+            background: rgba(212, 160, 160, 0.1);
+        }
+
+        .form-field {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95rem;
+            color: var(--charcoal-light);
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--cream-dark);
+            border-radius: 10px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            color: var(--charcoal);
+            background: var(--cream);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--sage-light);
+            box-shadow: 0 0 0 3px rgba(122, 139, 94, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--charcoal-light);
+            opacity: 0.4;
+        }
+
+        .type-toggle {
+            display: flex;
+            gap: 0;
+            border: 1.5px solid var(--cream-dark);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--cream);
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            background: transparent;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: var(--charcoal-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .type-btn.active {
+            background: var(--sage);
+            color: white;
+        }
+
+        .dish-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .dish-option {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1.5px solid transparent;
+        }
+
+        .dish-option:hover {
+            background: rgba(122, 139, 94, 0.05);
+        }
+
+        .dish-option.selected {
+            background: rgba(122, 139, 94, 0.08);
+            border-color: var(--sage-light);
+        }
+
+        .dish-radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--cream-dark);
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .dish-option.selected .dish-radio {
+            border-color: var(--sage);
+        }
+
+        .dish-option.selected .dish-radio::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--sage);
+        }
+
+        .dish-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            color: var(--charcoal-light);
+        }
+
+        .add-guest-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px dashed var(--cream-dark);
+            border-radius: 12px;
+            background: transparent;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            color: var(--sage);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .add-guest-btn:hover {
+            border-color: var(--sage-light);
+            background: rgba(122, 139, 94, 0.04);
+        }
+
+        .submit-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            width: 100%;
+            padding: 1.1rem 2.5rem;
+            border-radius: 50px;
+            border: none;
+            background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.05rem, 2.5vw, 1.15rem);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 4px 15px rgba(122, 139, 94, 0.3), 0 2px 6px rgba(122, 139, 94, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--sage-light) 0%, var(--sage) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(122, 139, 94, 0.35), 0 4px 10px rgba(122, 139, 94, 0.2);
+        }
+
+        .submit-btn:hover::before {
+            opacity: 1;
+        }
+
+        .submit-btn svg, .submit-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn:disabled:hover {
+            box-shadow: 0 4px 15px rgba(122, 139, 94, 0.3), 0 2px 6px rgba(122, 139, 94, 0.2);
+        }
+
+        .submit-btn:disabled:hover::before {
+            opacity: 0;
+        }
+
+        .decline-link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95rem;
+            color: var(--charcoal-light);
+            opacity: 0.5;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+            font-style: italic;
+        }
+
+        .decline-link:hover {
+            opacity: 0.8;
+            border-bottom-color: var(--rose);
+        }
+
+        .form-note {
+            margin-top: 1.5rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            color: var(--charcoal-light);
+            opacity: 0.5;
+            font-style: italic;
+        }
+
+        /* ============ RSVP ============ */
+
+        .rsvp {
+            padding: 5rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(180deg, transparent 0%, rgba(196, 163, 90, 0.04) 40%, rgba(196, 163, 90, 0.04) 60%, transparent 100%);
+        }
+
+        .rsvp-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(2rem, 6vw, 3rem);
+            color: var(--charcoal);
+            margin-bottom: 0.5rem;
+        }
+
+        .rsvp-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            color: var(--charcoal-light);
+            margin-bottom: 2.5rem;
+            font-style: italic;
+        }
+
+        .rsvp-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            align-items: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .rsvp-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            width: 100%;
+            padding: 1.1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.05rem, 2.5vw, 1.15rem);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+        }
+
+        .rsvp-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .rsvp-btn-yes {
+            background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(122, 139, 94, 0.3), 0 2px 6px rgba(122, 139, 94, 0.2);
+        }
+
+        .rsvp-btn-yes::before {
+            background: linear-gradient(135deg, var(--sage-light) 0%, var(--sage) 100%);
+        }
+
+        .rsvp-btn-yes:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(122, 139, 94, 0.35), 0 4px 10px rgba(122, 139, 94, 0.2);
+        }
+
+        .rsvp-btn-yes:hover::before {
+            opacity: 1;
+        }
+
+        .rsvp-btn-no {
+            background: transparent;
+            color: var(--charcoal-light);
+            border: 1.5px solid var(--cream-dark);
+            box-shadow: none;
+        }
+
+        .rsvp-btn-no:hover {
+            border-color: var(--rose);
+            color: var(--charcoal);
+            background: rgba(212, 160, 160, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .rsvp-btn svg {
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .rsvp-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .rsvp-note {
+            margin-top: 2rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            color: var(--charcoal-light);
+            opacity: 0.5;
+            font-style: italic;
+        }
+
+        /* ============ FOOTER ============ */
+
+        .footer {
+            padding: 4rem 1.5rem 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer-hearts {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        .footer-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            color: var(--charcoal-light);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .footer-names {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--sage);
+            margin-top: 1rem;
+        }
+
+        .footer-date-bottom {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--charcoal-light);
+            opacity: 0.35;
+            margin-top: 2.5rem;
+        }
+
+        /* ============ DIVIDERS ============ */
+
+        .section-divider {
+            display: flex;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+
+        .section-divider svg {
+            opacity: 0.2;
+        }
+
+        /* ============ DESKTOP ============ */
+
+        @media (min-width: 768px) {
+            .menu-cards {
+                flex-direction: row;
+            }
+
+            .menu-card {
+                flex: 1;
+            }
+
+            .rsvp-buttons {
+                flex-direction: row;
+                max-width: 560px;
+                gap: 1.5rem;
+            }
+
+            .rsvp-btn {
+                width: auto;
+                flex: 1;
+            }
+
+            .announcement {
+                padding: 7rem 2rem;
+            }
+
+            .menu-section {
+                padding: 5rem 2rem 4rem;
+            }
+
+            .form-section {
+                padding: 4rem 2rem 5rem;
+            }
+
+            .rsvp {
+                padding: 7rem 2rem 5rem;
+            }
+
+            .image-inner {
+                padding: 20px 20px 56px;
+            }
+
+            .ornament-line {
+                width: 90px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hero {
+                min-height: 100vh;
+            }
+
+            .announcement {
+                padding: 8rem 2rem;
+            }
+
+            .image-section {
+                padding: 4rem 2rem 6rem;
+            }
+
+            .rsvp {
+                padding: 8rem 2rem 6rem;
+            }
+
+            .branch-1, .branch-2 {
+                opacity: 0.38;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hero-names {
+                font-size: 2.6rem;
+            }
+
+            .image-inner {
+                padding: 10px 10px 42px;
+            }
+
+            .image-frame {
+                transform: rotate(-1deg);
+            }
+
+            .image-frame::before {
+                inset: -8px;
+            }
+
+            .corner-flourish {
+                width: 30px;
+                height: 30px;
+            }
+
+            .corner-flourish.top-left { top: -14px; left: -14px; }
+            .corner-flourish.top-right { top: -14px; right: -14px; }
+            .corner-flourish.bottom-left { bottom: -14px; left: -14px; }
+            .corner-flourish.bottom-right { bottom: -14px; right: -14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-pattern"></div>
+
+<!-- ======== HERO ======== -->
+<section class="hero section">
+    <svg class="wedding-deco branch-1" viewBox="0 0 140 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="leafSilver1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#A8BF8A"/>
+                <stop offset="35%" stop-color="#8B9A6B"/>
+                <stop offset="55%" stop-color="#B5CC96"/>
+                <stop offset="75%" stop-color="#7A8B5E"/>
+                <stop offset="100%" stop-color="#6B7D50"/>
+            </linearGradient>
+            <linearGradient id="leafShine" x1="0.2" y1="0" x2="0.8" y2="1">
+                <stop offset="0%" stop-color="#D4E8B8" stop-opacity="0.7"/>
+                <stop offset="50%" stop-color="#D4E8B8" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#F0F2F4" stop-opacity="0.3"/>
+            </linearGradient>
+        </defs>
+        <path d="M70 0 C67 50 73 100 66 150 C59 200 76 250 70 300 C64 350 74 400 70 480" stroke="url(#leafSilver1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="42" cy="35" rx="30" ry="12" transform="rotate(-35 42 35)" fill="url(#leafSilver1)" opacity="0.5"/>
+        <ellipse cx="42" cy="35" rx="26" ry="9" transform="rotate(-35 42 35)" fill="url(#leafShine)" opacity="0.4"/>
+        <ellipse cx="98" cy="75" rx="28" ry="11" transform="rotate(30 98 75)" fill="url(#leafSilver1)" opacity="0.45"/>
+        <ellipse cx="98" cy="75" rx="24" ry="8" transform="rotate(30 98 75)" fill="url(#leafShine)" opacity="0.35"/>
+        <ellipse cx="38" cy="120" rx="32" ry="12" transform="rotate(-40 38 120)" fill="url(#leafSilver1)" opacity="0.5"/>
+        <ellipse cx="38" cy="120" rx="27" ry="9" transform="rotate(-40 38 120)" fill="url(#leafShine)" opacity="0.4"/>
+        <ellipse cx="100" cy="165" rx="29" ry="11" transform="rotate(35 100 165)" fill="url(#leafSilver1)" opacity="0.45"/>
+        <ellipse cx="100" cy="165" rx="25" ry="8" transform="rotate(35 100 165)" fill="url(#leafShine)" opacity="0.35"/>
+        <ellipse cx="40" cy="210" rx="30" ry="12" transform="rotate(-30 40 210)" fill="url(#leafSilver1)" opacity="0.45"/>
+        <ellipse cx="40" cy="210" rx="26" ry="9" transform="rotate(-30 40 210)" fill="url(#leafShine)" opacity="0.35"/>
+        <ellipse cx="96" cy="255" rx="27" ry="11" transform="rotate(32 96 255)" fill="url(#leafSilver1)" opacity="0.4"/>
+        <ellipse cx="96" cy="255" rx="23" ry="8" transform="rotate(32 96 255)" fill="url(#leafShine)" opacity="0.3"/>
+        <ellipse cx="42" cy="300" rx="28" ry="11" transform="rotate(-35 42 300)" fill="url(#leafSilver1)" opacity="0.4"/>
+        <ellipse cx="42" cy="300" rx="24" ry="8" transform="rotate(-35 42 300)" fill="url(#leafShine)" opacity="0.3"/>
+        <ellipse cx="95" cy="345" rx="26" ry="10" transform="rotate(28 95 345)" fill="url(#leafSilver1)" opacity="0.35"/>
+        <ellipse cx="95" cy="345" rx="22" ry="7.5" transform="rotate(28 95 345)" fill="url(#leafShine)" opacity="0.25"/>
+        <ellipse cx="44" cy="390" rx="25" ry="10" transform="rotate(-28 44 390)" fill="url(#leafSilver1)" opacity="0.3"/>
+        <ellipse cx="93" cy="430" rx="23" ry="9" transform="rotate(25 93 430)" fill="url(#leafSilver1)" opacity="0.25"/>
+        <ellipse cx="46" cy="465" rx="22" ry="8.5" transform="rotate(-22 46 465)" fill="url(#leafSilver1)" opacity="0.2"/>
+    </svg>
+
+    <svg class="wedding-deco branch-2" viewBox="0 0 140 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="leafSilver2" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#A8BF8A"/>
+                <stop offset="35%" stop-color="#8B9A6B"/>
+                <stop offset="55%" stop-color="#B5CC96"/>
+                <stop offset="75%" stop-color="#7A8B5E"/>
+                <stop offset="100%" stop-color="#6B7D50"/>
+            </linearGradient>
+        </defs>
+        <path d="M70 0 C73 50 67 100 74 150 C81 200 64 250 70 300 C76 350 66 400 70 480" stroke="url(#leafSilver2)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="98" cy="40" rx="30" ry="12" transform="rotate(35 98 40)" fill="url(#leafSilver2)" opacity="0.5"/>
+        <ellipse cx="98" cy="40" rx="26" ry="9" transform="rotate(35 98 40)" fill="url(#leafShine)" opacity="0.4"/>
+        <ellipse cx="42" cy="80" rx="28" ry="11" transform="rotate(-30 42 80)" fill="url(#leafSilver2)" opacity="0.45"/>
+        <ellipse cx="42" cy="80" rx="24" ry="8" transform="rotate(-30 42 80)" fill="url(#leafShine)" opacity="0.35"/>
+        <ellipse cx="102" cy="125" rx="32" ry="12" transform="rotate(40 102 125)" fill="url(#leafSilver2)" opacity="0.5"/>
+        <ellipse cx="102" cy="125" rx="27" ry="9" transform="rotate(40 102 125)" fill="url(#leafShine)" opacity="0.4"/>
+        <ellipse cx="40" cy="170" rx="29" ry="11" transform="rotate(-35 40 170)" fill="url(#leafSilver2)" opacity="0.45"/>
+        <ellipse cx="40" cy="170" rx="25" ry="8" transform="rotate(-35 40 170)" fill="url(#leafShine)" opacity="0.35"/>
+        <ellipse cx="100" cy="215" rx="30" ry="12" transform="rotate(30 100 215)" fill="url(#leafSilver2)" opacity="0.45"/>
+        <ellipse cx="100" cy="215" rx="26" ry="9" transform="rotate(30 100 215)" fill="url(#leafShine)" opacity="0.35"/>
+        <ellipse cx="44" cy="260" rx="27" ry="11" transform="rotate(-32 44 260)" fill="url(#leafSilver2)" opacity="0.4"/>
+        <ellipse cx="44" cy="260" rx="23" ry="8" transform="rotate(-32 44 260)" fill="url(#leafShine)" opacity="0.3"/>
+        <ellipse cx="98" cy="305" rx="28" ry="11" transform="rotate(35 98 305)" fill="url(#leafSilver2)" opacity="0.4"/>
+        <ellipse cx="98" cy="305" rx="24" ry="8" transform="rotate(35 98 305)" fill="url(#leafShine)" opacity="0.3"/>
+        <ellipse cx="45" cy="350" rx="26" ry="10" transform="rotate(-28 45 350)" fill="url(#leafSilver2)" opacity="0.35"/>
+        <ellipse cx="96" cy="395" rx="25" ry="10" transform="rotate(28 96 395)" fill="url(#leafSilver2)" opacity="0.3"/>
+        <ellipse cx="47" cy="435" rx="23" ry="9" transform="rotate(-25 47 435)" fill="url(#leafSilver2)" opacity="0.25"/>
+        <ellipse cx="94" cy="468" rx="22" ry="8.5" transform="rotate(22 94 468)" fill="url(#leafSilver2)" opacity="0.2"/>
+    </svg>
+
+    <svg class="wedding-deco rings-deco" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="16" stroke="var(--gold)" stroke-width="2.5" fill="none"/>
+        <circle cx="50" cy="30" r="16" stroke="var(--gold)" stroke-width="2.5" fill="none"/>
+        <circle cx="30" cy="30" r="13" stroke="var(--gold-light)" stroke-width="0.8" fill="none" opacity="0.4"/>
+        <circle cx="50" cy="30" r="13" stroke="var(--gold-light)" stroke-width="0.8" fill="none" opacity="0.4"/>
+    </svg>
+
+    <svg class="petal petal-1" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="4" ry="8" transform="rotate(15 10 10)" fill="#8B9A6B" opacity="0.85"/></svg>
+    <svg class="petal petal-2" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="3.5" ry="7" transform="rotate(-20 10 10)" fill="#C47070" opacity="0.75"/></svg>
+    <svg class="petal petal-3" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="4" ry="7.5" transform="rotate(30 10 10)" fill="#9BAF7C" opacity="0.8"/></svg>
+    <svg class="petal petal-4" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="3" ry="6.5" transform="rotate(-10 10 10)" fill="#C4A35A" opacity="0.75"/></svg>
+    <svg class="petal petal-5" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="3.5" ry="7" transform="rotate(25 10 10)" fill="#D48A8A" opacity="0.8"/></svg>
+    <svg class="petal petal-6" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="4" ry="7" transform="rotate(-15 10 10)" fill="#7A8B5E" opacity="0.75"/></svg>
+    <svg class="petal petal-7" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="5" ry="6" transform="rotate(25 10 10)" fill="#B07070" opacity="0.7"/></svg>
+    <svg class="petal petal-8" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="4" ry="7" transform="rotate(-30 10 10)" fill="#A8BF8A" opacity="0.75"/></svg>
+
+    <div class="hero-content">
+        <p class="hero-date-top reveal">{{date_short}}</p>
+
+        <div class="ornament reveal reveal-delay-1">
+            <span class="ornament-line"></span>
+            <span class="ornament-diamond"></span>
+            <span class="ornament-line"></span>
+        </div>
+
+        <h1 class="hero-names reveal reveal-delay-1">
+            Sandra
+            <span class="ampersand">&amp;</span>
+            Iván
+        </h1>
+
+        <div class="ornament reveal reveal-delay-2">
+            <span class="ornament-line"></span>
+            <span class="ornament-diamond"></span>
+            <span class="ornament-line"></span>
+        </div>
+
+        <p class="hero-date reveal reveal-delay-2">{{location}}</p>
+    </div>
+
+    <div class="scroll-indicator">
+        <span>Desliza</span>
+        <div class="scroll-arrow"></div>
+    </div>
+</section>
+
+<!-- ======== DIVIDER ALIANZAS ======== -->
+<div class="section-divider">
+    <svg width="260" height="72" viewBox="0 0 260 72" fill="none">
+        <defs>
+            <linearGradient id="ringGold1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#E8D5A0"/>
+                <stop offset="30%" stop-color="#C4A35A"/>
+                <stop offset="50%" stop-color="#F0E0B0"/>
+                <stop offset="70%" stop-color="#C4A35A"/>
+                <stop offset="100%" stop-color="#A8883E"/>
+            </linearGradient>
+            <linearGradient id="ringGold2" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E8D5A0"/>
+                <stop offset="30%" stop-color="#C4A35A"/>
+                <stop offset="50%" stop-color="#F0E0B0"/>
+                <stop offset="70%" stop-color="#C4A35A"/>
+                <stop offset="100%" stop-color="#A8883E"/>
+            </linearGradient>
+            <linearGradient id="ringShine1" x1="0.3" y1="0" x2="0.7" y2="1">
+                <stop offset="0%" stop-color="#FFF8E8" stop-opacity="0.6"/>
+                <stop offset="50%" stop-color="#FFF8E8" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#FFF8E8" stop-opacity="0.2"/>
+            </linearGradient>
+            <filter id="ringShadow">
+                <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#A8883E" flood-opacity="0.2"/>
+            </filter>
+        </defs>
+        <path d="M0 36 Q35 14 78 36" stroke="var(--sage)" stroke-width="0.8" fill="none" opacity="0.25"/>
+        <path d="M182 36 Q225 58 260 36" stroke="var(--sage)" stroke-width="0.8" fill="none" opacity="0.25"/>
+        <g filter="url(#ringShadow)">
+            <circle cx="117" cy="36" r="20" stroke="url(#ringGold1)" stroke-width="4.5" fill="none"/>
+            <circle cx="117" cy="36" r="16.5" stroke="url(#ringShine1)" stroke-width="1.2" fill="none"/>
+            <circle cx="143" cy="36" r="20" stroke="url(#ringGold2)" stroke-width="4.5" fill="none"/>
+            <circle cx="143" cy="36" r="16.5" stroke="url(#ringShine1)" stroke-width="1.2" fill="none"/>
+        </g>
+    </svg>
+</div>
+
+<!-- ======== ANNOUNCEMENT ======== -->
+<section class="announcement section">
+    <div class="announcement-inner">
+        <p class="announcement-date reveal">El próximo {{date_formatted}}</p>
+        <h2 class="announcement-headline reveal reveal-delay-1">¡¡Nos casamos!!</h2>
+        <p class="announcement-body reveal reveal-delay-2">
+            Queremos compartir con vosotros este día tan especial.<br><br>
+            Será una ceremonia civil en el <a href="{{venue_map_url}}" target="_blank" rel="noopener" class="venue-link">Ayuntamiento de {{location}}<svg class="pin-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg></a> a las <strong>13 horas</strong> del mediodía.<br><br>
+            Os esperamos después del enlace en la comida que haremos para celebrarlo en el <a href="{{venue2_map_url}}" target="_blank" rel="noopener" class="venue-link">{{venue2}}<svg class="pin-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/></svg></a>.
+        </p>
+        <p class="announcement-cta reveal reveal-delay-3">¡¡No faltéis!!</p>
+    </div>
+</section>
+
+<!-- ======== DIVIDER ======== -->
+<div class="section-divider">
+    <svg width="160" height="30" viewBox="0 0 160 30" fill="none">
+        <path d="M0 15H55" stroke="var(--gold)" stroke-width="0.5" opacity="0.4"/>
+        <path d="M105 15H160" stroke="var(--gold)" stroke-width="0.5" opacity="0.4"/>
+        <path d="M65 5 Q72 0 80 5 Q88 10 80 15 Q72 20 65 15 Q58 10 65 5Z" stroke="var(--sage)" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M80 5 Q88 0 95 5 Q102 10 95 15 Q88 20 80 15" stroke="var(--sage)" stroke-width="1" fill="none" opacity="0.4"/>
+    </svg>
+</div>
+
+<!-- ======== ALBUM ======== -->
+<section class="album-section section">
+    <h2 class="album-title reveal">Nuestra historia</h2>
+    <p class="album-subtitle reveal reveal-delay-1">Pasa las páginas de nuestro álbum</p>
+
+    <div class="album-container reveal reveal-delay-2">
+        <div class="album-book" id="album-book">
+            <div class="album-page" data-index="0">
+                <div class="album-page-inner">
+                    <img src="album-2021.jpg" alt="{{partner1}} & {{partner2}} en 2021" class="album-page-img" loading="lazy">
+                    <div class="album-page-footer"><p class="album-page-year">2021</p></div>
+                </div>
+            </div>
+            <div class="album-page" data-index="1">
+                <div class="album-page-inner">
+                    <img src="album-2022.jpg" alt="{{partner1}} & {{partner2}} en 2022" class="album-page-img" loading="lazy">
+                    <div class="album-page-footer"><p class="album-page-year">2022</p></div>
+                </div>
+            </div>
+            <div class="album-page" data-index="2">
+                <div class="album-page-inner">
+                    <img src="album-2023.jpg" alt="{{partner1}} & {{partner2}} en 2023" class="album-page-img" loading="lazy">
+                    <div class="album-page-footer"><p class="album-page-year">2023</p></div>
+                </div>
+            </div>
+            <div class="album-page" data-index="3">
+                <div class="album-page-inner">
+                    <img src="album-2024.jpg" alt="{{partner1}} & {{partner2}} en 2024" class="album-page-img" loading="lazy">
+                    <div class="album-page-footer"><p class="album-page-year">2024</p></div>
+                </div>
+            </div>
+            <div class="album-page" data-index="4">
+                <div class="album-page-inner">
+                    <img src="album-2025.jpg" alt="{{partner1}} & {{partner2}} en 2025" class="album-page-img" loading="lazy">
+                    <div class="album-page-footer"><p class="album-page-year">2025</p></div>
+                </div>
+            </div>
+            <div class="album-page" data-index="5">
+                <div class="album-page-inner">
+                    <img src="invitacion.jpg" alt="Ilustración de boda de {{partner1}} & {{partner2}}" class="album-page-img" loading="lazy" style="object-position: right center;">
+                    <div class="album-page-footer">
+                        <p class="album-page-year">2026</p>
+                        <p class="album-page-label">...y el resto de nuestra vida</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="album-nav reveal reveal-delay-3">
+        <button class="album-nav-btn" id="album-prev" onclick="albumPrev()" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="album-dots" id="album-dots"></div>
+        <button class="album-nav-btn" id="album-next" onclick="albumNext()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+    </div>
+    <p class="album-hint">Toca la foto o usa las flechas</p>
+</section>
+
+<!-- ======== DIVIDER ======== -->
+<div class="section-divider">
+    <svg width="120" height="30" viewBox="0 0 120 30" fill="none">
+        <path d="M0 15 Q30 30 60 15 Q90 0 120 15" stroke="var(--sage)" stroke-width="1" fill="none"/>
+        <circle cx="60" cy="15" r="3" fill="var(--gold)"/>
+    </svg>
+</div>
+
+<!-- ======== MENU ======== -->
+<section class="menu-section section">
+    <h2 class="menu-section-title reveal">El Banquete</h2>
+    <p class="menu-section-subtitle reveal reveal-delay-1">{{venue2}}</p>
+
+    <div class="menu-cards">
+        <div class="menu-card reveal reveal-delay-2">
+            <div class="menu-card-header">
+                <span class="menu-card-icon">🍷</span>
+                <span class="menu-card-title">Menú Adulto</span>
+            </div>
+            <p class="menu-phase">Comenzamos...</p>
+            <p class="menu-phase-note">A compartir 4 personas:</p>
+            <ul class="menu-items">
+                <li>Ensalada La Cava</li>
+                <li>Surtido Ibérico <small>(Lomo, chorizo, salchichón y queso)</small></li>
+                <li>Langostinos con salsa rosa</li>
+            </ul>
+            <p class="menu-interlude">~ Sorbete de limón ~</p>
+            <p class="menu-phase">Continuamos...</p>
+            <p class="menu-choose-label">✦ Individual a elegir entre:</p>
+            <ul class="menu-items">
+                <li>Cochinillo</li>
+                <li>Entrecot</li>
+                <li>Bacalao</li>
+                <li>Salmón</li>
+            </ul>
+            <p class="menu-extras">Pan, postre y café</p>
+        </div>
+
+        <div class="menu-card reveal reveal-delay-3">
+            <div class="menu-card-header">
+                <span class="menu-card-icon">🧃</span>
+                <span class="menu-card-title">Menú Infantil</span>
+            </div>
+            <ul class="menu-items">
+                <li>Entremeses variados</li>
+            </ul>
+            <p class="menu-choose-label">✦ A elegir entre:</p>
+            <ul class="menu-items">
+                <li>Cinta de lomo con patatas</li>
+                <li>Finger de pollo con patatas</li>
+                <li>Ternera con patatas</li>
+            </ul>
+            <p class="menu-extras">1 bebida + 1 bola de helado</p>
+        </div>
+
+        <div class="menu-card reveal reveal-delay-4">
+            <div class="menu-card-header">
+                <span class="menu-card-icon">🌿</span>
+                <span class="menu-card-title">Menú Vegano</span>
+            </div>
+            <p class="menu-interlude" style="margin-top: 0.5rem;">Menú por determinar</p>
+            <p class="menu-extras">Si necesitas esta opción, selecciónala al confirmar tu asistencia y nos pondremos en contacto contigo.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ======== DIVIDER ======== -->
+<div class="section-divider">
+    <svg width="120" height="30" viewBox="0 0 120 30" fill="none">
+        <path d="M0 15 Q30 30 60 15 Q90 0 120 15" stroke="var(--gold)" stroke-width="1" fill="none"/>
+        <circle cx="60" cy="15" r="3" fill="var(--sage)"/>
+    </svg>
+</div>
+
+<!-- ======== FORM ======== -->
+<section class="form-section section">
+    <h2 class="form-section-title reveal">Confirma tu asistencia</h2>
+    <p class="form-section-subtitle reveal reveal-delay-1">Añade a cada comensal y elige su plato</p>
+
+    <div class="form-container reveal reveal-delay-2">
+        <div id="guests-list"></div>
+
+        <button type="button" class="add-guest-btn" onclick="addGuest()">
+            + Añadir otro comensal
+        </button>
+
+        <button type="button" class="submit-btn" id="submit-btn" onclick="sendWhatsApp()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <span>Enviar por WhatsApp</span>
+        </button>
+
+        <a href="https://wa.me/{{whatsapp_number}}?text=Hola%2C%20lamentablemente%20no%20voy%20a%20poder%20asistir%20a%20vuestra%20boda%20el%2026%20de%20Junio.%20%C2%A1Os%20deseo%20lo%20mejor!%20%F0%9F%92%95"
+           class="decline-link" target="_blank" rel="noopener">No puedo ir 😢</a>
+
+        <p class="form-note">Se abrirá WhatsApp con tu confirmación y elección de menú</p>
+    </div>
+</section>
+
+<!-- ======== FOOTER ======== -->
+<footer class="footer section">
+    <div class="ornament reveal">
+        <span class="ornament-line"></span>
+        <span class="ornament-diamond"></span>
+        <span class="ornament-line"></span>
+    </div>
+    <p class="footer-text reveal reveal-delay-1">Con todo nuestro amor</p>
+    <p class="footer-names reveal reveal-delay-2">{{partner1}} & {{partner2}}</p>
+    <p class="footer-date-bottom reveal reveal-delay-3">{{date_formatted}}</p>
+</footer>
+
+<script>
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                scrollIndicator.style.opacity = '0';
+                scrollIndicator.style.transition = 'opacity 0.5s ease';
+            } else {
+                scrollIndicator.style.opacity = '1';
+            }
+        }, { passive: true });
+    }
+
+    const adultDishes = ['Cochinillo', 'Entrecot', 'Bacalao', 'Salmón'];
+    const kidDishes = ['Cinta de lomo con patatas', 'Finger de pollo con patatas', 'Ternera con patatas'];
+    const veganDishes = ['Menú vegano (por determinar)'];
+    let guestCount = 0;
+
+    function createGuestCard(index) {
+        const isFirst = index === 0;
+        const card = document.createElement('div');
+        card.className = 'guest-card';
+        card.dataset.index = index;
+        card.dataset.type = 'adulto';
+        card.dataset.dish = '';
+
+        card.innerHTML =
+            '<div class="guest-card-header">' +
+                '<span class="guest-number">Comensal ' + (index + 1) + '</span>' +
+                (isFirst ? '' : '<button type="button" class="guest-remove" onclick="removeGuest(this)">&times;</button>') +
+            '</div>' +
+            '<div class="form-field">' +
+                '<label class="form-label">Nombre</label>' +
+                '<input type="text" class="form-input guest-name" placeholder="Nombre y apellido">' +
+            '</div>' +
+            '<div class="form-field">' +
+                '<label class="form-label">Tipo de menú</label>' +
+                '<div class="type-toggle">' +
+                    '<button type="button" class="type-btn active" onclick="setType(this,\'adulto\')">🍷 Adulto</button>' +
+                    '<button type="button" class="type-btn" onclick="setType(this,\'infantil\')">🧃 Infantil</button>' +
+                    '<button type="button" class="type-btn" onclick="setType(this,\'vegano\')">🌿 Vegano</button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="form-field">' +
+                '<label class="form-label">Plato principal</label>' +
+                '<div class="dish-options">' + buildDishOptions(adultDishes, index) + '</div>' +
+            '</div>';
+
+        return card;
+    }
+
+    function buildDishOptions(dishes, guestIndex) {
+        return dishes.map(function(dish) {
+            return '<div class="dish-option" onclick="selectDish(this, \'' + dish.replace(/'/g, "\\'") + '\')">' +
+                '<div class="dish-radio"></div>' +
+                '<span class="dish-name">' + dish + '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    function addGuest() {
+        var list = document.getElementById('guests-list');
+        var card = createGuestCard(guestCount);
+        list.appendChild(card);
+        guestCount++;
+        updateGuestNumbers();
+    }
+
+    function removeGuest(btn) {
+        var card = btn.closest('.guest-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px)';
+        card.style.transition = 'all 0.3s ease';
+        setTimeout(function() {
+            card.remove();
+            updateGuestNumbers();
+        }, 300);
+    }
+
+    function updateGuestNumbers() {
+        var cards = document.querySelectorAll('.guest-card');
+        cards.forEach(function(card, i) {
+            card.querySelector('.guest-number').textContent = 'Comensal ' + (i + 1);
+        });
+    }
+
+    function setType(btn, type) {
+        var card = btn.closest('.guest-card');
+        card.dataset.type = type;
+        card.dataset.dish = '';
+
+        var toggleBtns = card.querySelectorAll('.type-btn');
+        toggleBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        var dishes = type === 'adulto' ? adultDishes : type === 'infantil' ? kidDishes : veganDishes;
+        var optionsContainer = card.querySelector('.dish-options');
+        optionsContainer.innerHTML = buildDishOptions(dishes, 0);
+
+        if (type === 'vegano') {
+            var firstOption = optionsContainer.querySelector('.dish-option');
+            if (firstOption) {
+                firstOption.classList.add('selected');
+                card.dataset.dish = veganDishes[0];
+            }
+        }
+    }
+
+    function selectDish(option, dish) {
+        var card = option.closest('.guest-card');
+        card.dataset.dish = dish;
+
+        var allOptions = card.querySelectorAll('.dish-option');
+        allOptions.forEach(function(opt) { opt.classList.remove('selected'); });
+        option.classList.add('selected');
+    }
+
+    function sendWhatsApp() {
+        var cards = document.querySelectorAll('.guest-card');
+        var guests = [];
+        var valid = true;
+
+        cards.forEach(function(card) {
+            var name = card.querySelector('.guest-name').value.trim();
+            var type = card.dataset.type;
+            var dish = card.dataset.dish;
+
+            if (!name) {
+                card.querySelector('.guest-name').style.borderColor = '#D4A0A0';
+                valid = false;
+            } else {
+                card.querySelector('.guest-name').style.borderColor = '';
+            }
+
+            if (!dish) {
+                card.querySelector('.dish-options').style.outline = '2px solid rgba(212, 160, 160, 0.4)';
+                card.querySelector('.dish-options').style.borderRadius = '10px';
+                valid = false;
+            } else {
+                card.querySelector('.dish-options').style.outline = '';
+            }
+
+            if (name && dish) {
+                var icon = type === 'adulto' ? '👤' : type === 'infantil' ? '👧' : '🌿';
+                var typeLabel = type === 'adulto' ? 'Adulto' : type === 'infantil' ? 'Infantil' : 'Vegano';
+                guests.push(icon + ' ' + name + ' (' + typeLabel + '): ' + dish);
+            }
+        });
+
+        if (!valid) return;
+
+        var message = '¡Hola! 🎉 Os confirmo asistencia y elección de menú para la boda:\n\n' +
+            guests.join('\n') +
+            '\n\n¡Nos vemos el 26 de Junio! 💒';
+
+        var encoded = encodeURIComponent(message);
+        window.open('https://wa.me/{{whatsapp_number}}?text=' + encoded, '_blank');
+    }
+
+    addGuest();
+
+    var albumCurrent = 0;
+    var albumPages = document.querySelectorAll('.album-page');
+    var albumTotal = albumPages.length;
+    var dotsContainer = document.getElementById('album-dots');
+
+    function initAlbum() {
+        for (var i = 0; i < albumTotal; i++) {
+            var dot = document.createElement('button');
+            dot.className = 'album-dot' + (i === 0 ? ' active' : '');
+            dot.dataset.index = i;
+            dot.onclick = function() { goToAlbumPage(parseInt(this.dataset.index)); };
+            dotsContainer.appendChild(dot);
+        }
+        updateAlbumPages();
+    }
+
+    function updateAlbumPages() {
+        albumPages.forEach(function(page, i) {
+            page.classList.remove('flipped', 'behind');
+            if (i < albumCurrent) {
+                page.classList.add('flipped');
+            } else if (i > albumCurrent) {
+                page.style.zIndex = albumTotal - i;
+            }
+            page.style.zIndex = i < albumCurrent ? i : albumTotal - i;
+        });
+
+        var dots = dotsContainer.querySelectorAll('.album-dot');
+        dots.forEach(function(d, i) {
+            d.classList.toggle('active', i === albumCurrent);
+        });
+
+        document.getElementById('album-prev').disabled = albumCurrent === 0;
+        document.getElementById('album-next').disabled = albumCurrent === albumTotal - 1;
+    }
+
+    function albumNext() {
+        if (albumCurrent < albumTotal - 1) {
+            albumCurrent++;
+            updateAlbumPages();
+        }
+    }
+
+    function albumPrev() {
+        if (albumCurrent > 0) {
+            albumCurrent--;
+            updateAlbumPages();
+        }
+    }
+
+    function goToAlbumPage(index) {
+        albumCurrent = index;
+        updateAlbumPages();
+    }
+
+    albumPages.forEach(function(page) {
+        page.addEventListener('click', function() {
+            var idx = parseInt(this.dataset.index);
+            if (idx === albumCurrent && albumCurrent < albumTotal - 1) {
+                albumNext();
+            }
+        });
+    });
+
+    var albumBook = document.getElementById('album-book');
+    var touchStartX = 0;
+    var touchEndX = 0;
+
+    albumBook.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    albumBook.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        var diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) albumNext();
+            else albumPrev();
+        }
+    }, { passive: true });
+
+    initAlbum();
+</script>
+
+</body>
+</html>
