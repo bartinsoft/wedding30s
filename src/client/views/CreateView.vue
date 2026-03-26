@@ -955,8 +955,8 @@ async function publish() {
     })
     const data = await res.json()
 
-    if (data.checkoutUrl) {
-      window.location.href = data.checkoutUrl
+    if (data.url && data.url.startsWith('http')) {
+      window.location.href = data.url
     } else if (data.slug) {
       router.push(`/dashboard/${weddingId.value}?token=${secretToken.value}`)
     }
