@@ -1,8 +1,10 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
 import fs from 'node:fs';
 import weddingsRouter from './routes/weddings.js';
 import webhooksRouter from './routes/webhooks.js';
+import { getFromS3 } from './storage/s3.js';
 
 for (const dir of ['data', 'public/uploads/tmp', 'weddings', 'templates']) {
   fs.mkdirSync(path.resolve(dir), { recursive: true });
@@ -22,6 +24,18 @@ const clientDist = path.resolve('dist/client');
 if (fs.existsSync(clientDist)) {
   app.use(express.static(clientDist));
 }
+
+app.get('/media/*', async (req, res) => {
+  const key = req.params[0];
+  const result = await getFromS3(key);
+  if (!result) {
+    res.status(404).send('Not found');
+    return;
+  }
+  res.set('Content-Type', result.contentType);
+  res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  result.stream.pipe(res);
+});
 
 app.use(webhooksRouter);
 app.use(weddingsRouter);

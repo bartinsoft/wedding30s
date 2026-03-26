@@ -2,16 +2,16 @@ import { Router } from 'express';
 import { nanoid } from 'nanoid';
 import multer from 'multer';
 import sharp from 'sharp';
-import path from 'node:path';
 import fs from 'node:fs';
-import db from '../db/index.js';
+import { query, queryOne, execute } from '../db/index.js';
 import { generateWeddingHtml } from '../generator.js';
+import { uploadToS3 } from '../storage/s3.js';
 
 const router = Router();
 
 const upload = multer({ dest: 'public/uploads/tmp/' });
 
-function generateSlug(p1: string, p2: string): string {
+async function generateSlug(p1: string, p2: string): Promise<string> {
   const base = `${p1}-${p2}`
     .toLowerCase()
     .normalize('NFD')
@@ -20,13 +20,13 @@ function generateSlug(p1: string, p2: string): string {
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
 
-  const existing = db.prepare('SELECT slug FROM weddings WHERE slug = ?').get(base);
+  const existing = await queryOne('SELECT slug FROM weddings WHERE slug = ?', [base]);
   if (!existing) return base;
 
   return `${base}-${nanoid(4)}`;
 }
 
-router.post('/api/weddings', (req, res) => {
+router.post('/api/weddings', async (req, res) => {
   try {
     const { partner1_name, partner2_name, date, location, venue, template, colors, email, story, menu, program } = req.body;
 
@@ -36,52 +36,70 @@ router.post('/api/weddings', (req, res) => {
     }
 
     const id = nanoid();
-    const slug = generateSlug(partner1_name, partner2_name);
+    const slug = await generateSlug(partner1_name, partner2_name);
+    const secret_token = nanoid(32);
 
-    db.prepare(`
-      INSERT INTO weddings (id, slug, partner1_name, partner2_name, date, location, venue, template, colors, email, story, menu, program)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id, slug, partner1_name, partner2_name, date, location,
-      venue || null,
-      template || 'classic',
-      colors ? JSON.stringify(colors) : '{"primary":"#7A8B5E","secondary":"#C4A35A","bg":"#FDFBF7","text":"#2C3E2D"}',
-      email,
-      story || null,
-      menu || null,
-      program || null
+    await execute(
+      `INSERT INTO weddings (id, slug, partner1_name, partner2_name, date, location, venue, template, colors, email, story, menu, program, secret_token)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id, slug, partner1_name, partner2_name, date, location,
+        venue || null,
+        template || 'classic-garden',
+        colors ? JSON.stringify(colors) : '{"primary":"#7A8B5E","secondary":"#C4A35A","bg":"#FDFBF7","text":"#2C3E2D"}',
+        email,
+        story || null,
+        menu ? JSON.stringify(menu) : null,
+        program ? JSON.stringify(program) : null,
+        secret_token,
+      ]
     );
 
-    res.status(201).json({ id, slug });
+    res.status(201).json({ id, slug, secret_token });
   } catch (err) {
+    console.error('Failed to create wedding:', err);
     res.status(500).json({ error: 'Failed to create wedding' });
   }
 });
 
-router.get('/api/weddings/:id', (req, res) => {
-  const wedding = db.prepare('SELECT * FROM weddings WHERE id = ?').get(req.params.id);
+router.get('/api/weddings/:id', async (req, res) => {
+  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]);
   if (!wedding) {
     res.status(404).json({ error: 'Wedding not found' });
     return;
   }
+
+  const token = req.query.token as string || req.headers['x-wedding-token'] as string;
+  if (wedding.secret_token && token !== wedding.secret_token) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
   res.json(wedding);
 });
 
-router.put('/api/weddings/:id', (req, res) => {
-  const wedding = db.prepare('SELECT * FROM weddings WHERE id = ?').get(req.params.id);
+router.put('/api/weddings/:id', async (req, res) => {
+  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]);
   if (!wedding) {
     res.status(404).json({ error: 'Wedding not found' });
     return;
   }
 
-  const fields = ['partner1_name', 'partner2_name', 'date', 'location', 'venue', 'template', 'colors', 'story', 'menu', 'program', 'custom_domain', 'email'];
+  const token = req.query.token as string || req.headers['x-wedding-token'] as string;
+  if (wedding.secret_token && token !== wedding.secret_token) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const fields = ['partner1_name', 'partner2_name', 'date', 'location', 'venue', 'template', 'colors', 'story', 'menu', 'program', 'photos', 'custom_domain', 'email'];
   const updates: string[] = [];
   const values: unknown[] = [];
 
   for (const field of fields) {
     if (req.body[field] !== undefined) {
       updates.push(`${field} = ?`);
-      values.push(field === 'colors' ? JSON.stringify(req.body[field]) : req.body[field]);
+      const needsJson = field === 'colors' || field === 'photos' || field === 'menu' || field === 'program';
+      values.push(needsJson && typeof req.body[field] === 'object' ? JSON.stringify(req.body[field]) : req.body[field]);
     }
   }
 
@@ -90,12 +108,12 @@ router.put('/api/weddings/:id', (req, res) => {
     return;
   }
 
-  updates.push("updated_at = datetime('now')");
+  updates.push('updated_at = NOW()');
   values.push(req.params.id);
 
-  db.prepare(`UPDATE weddings SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+  await execute(`UPDATE weddings SET ${updates.join(', ')} WHERE id = ?`, values);
 
-  const updated = db.prepare('SELECT * FROM weddings WHERE id = ?').get(req.params.id);
+  const updated = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]);
   res.json(updated);
 });
 
@@ -106,26 +124,23 @@ router.post('/api/weddings/:id/photo', upload.single('photo'), async (req, res) 
       return;
     }
 
-    const wedding = db.prepare('SELECT * FROM weddings WHERE id = ?').get(req.params.id);
+    const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]);
     if (!wedding) {
       res.status(404).json({ error: 'Wedding not found' });
       return;
     }
 
-    const uploadsDir = path.resolve('public/uploads');
-    fs.mkdirSync(uploadsDir, { recursive: true });
-
-    const outputPath = path.join(uploadsDir, `${req.params.id}.webp`);
-
-    await sharp(req.file.path)
+    const buffer = await sharp(req.file.path)
       .resize(1200)
       .webp({ quality: 85 })
-      .toFile(outputPath);
+      .toBuffer();
 
     fs.unlinkSync(req.file.path);
 
-    const photoUrl = `/uploads/${req.params.id}.webp`;
-    db.prepare("UPDATE weddings SET photo_url = ?, updated_at = datetime('now') WHERE id = ?").run(photoUrl, req.params.id);
+    const key = `photos/${req.params.id}/hero.webp`;
+    const photoUrl = await uploadToS3(buffer, key, 'image/webp');
+
+    await execute("UPDATE weddings SET photo_url = ?, updated_at = NOW() WHERE id = ?", [photoUrl, req.params.id]);
 
     res.json({ photo_url: photoUrl });
   } catch (err) {
@@ -133,16 +148,81 @@ router.post('/api/weddings/:id/photo', upload.single('photo'), async (req, res) 
   }
 });
 
-router.post('/api/weddings/:id/publish', async (req, res) => {
+router.post('/api/weddings/:id/gallery', upload.array('photos', 20), async (req, res) => {
   try {
-    const Stripe = (await import('stripe')).default;
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      res.status(400).json({ error: 'No files uploaded' });
+      return;
+    }
 
-    const wedding = db.prepare('SELECT * FROM weddings WHERE id = ?').get(req.params.id) as Record<string, string> | undefined;
+    const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, string> | undefined;
     if (!wedding) {
       res.status(404).json({ error: 'Wedding not found' });
       return;
     }
+
+    const photos: { url: string; year: string; label: string }[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const buffer = await sharp(file.path)
+        .resize(1200)
+        .webp({ quality: 85 })
+        .toBuffer();
+
+      fs.unlinkSync(file.path);
+
+      const key = `photos/${req.params.id}/gallery-${i}-${Date.now()}.webp`;
+      const url = await uploadToS3(buffer, key, 'image/webp');
+
+      photos.push({ url, year: '', label: '' });
+    }
+
+    const existingRaw = wedding.photos as string | null;
+    const existingPhotos = existingRaw ? JSON.parse(existingRaw) : [];
+    const allPhotos = [...existingPhotos, ...photos];
+
+    await execute("UPDATE weddings SET photos = ?, updated_at = NOW() WHERE id = ?", [JSON.stringify(allPhotos), req.params.id]);
+
+    res.json({ photos: allPhotos });
+  } catch (err) {
+    console.error('Failed to upload gallery photos:', err);
+    res.status(500).json({ error: 'Failed to upload photos' });
+  }
+});
+
+function isProduction(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+function getStripeKeys(email: string) {
+  const useTest = !isProduction() || email.toLowerCase().endsWith('@bartinsoft.com');
+
+  if (useTest) {
+    return {
+      secretKey: process.env.STRIPE_SECRET_KEY_TEST || process.env.STRIPE_SECRET_KEY!,
+      mode: 'test' as const,
+    };
+  }
+  return {
+    secretKey: process.env.STRIPE_SECRET_KEY!,
+    mode: 'live' as const,
+  };
+}
+
+router.post('/api/weddings/:id/publish', async (req, res) => {
+  try {
+    const Stripe = (await import('stripe')).default;
+
+    const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, string> | undefined;
+    if (!wedding) {
+      res.status(404).json({ error: 'Wedding not found' });
+      return;
+    }
+
+    const { secretKey, mode } = getStripeKeys(wedding.email);
+    const stripe = new Stripe(secretKey);
 
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
@@ -152,34 +232,42 @@ router.post('/api/weddings/:id/publish', async (req, res) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: `Wedding website: ${wedding.partner1_name} & ${wedding.partner2_name}`,
+            name: `Wedding30s — ${wedding.partner1_name} & ${wedding.partner2_name}`,
+            description: 'Tu web de boda personalizada',
           },
           unit_amount: 2900,
         },
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${baseUrl}/dashboard/${req.params.id}?published=true`,
-      cancel_url: `${baseUrl}/create?id=${req.params.id}`,
+      success_url: `${baseUrl}/dashboard/${req.params.id}?published=true&token=${wedding.secret_token}`,
+      cancel_url: `${baseUrl}/create?id=${req.params.id}&token=${wedding.secret_token}`,
+      metadata: { stripe_mode: mode, wedding_id: req.params.id },
+      payment_intent_data: {
+        statement_descriptor: 'WEDDING30S',
+      },
     });
 
-    db.prepare("UPDATE weddings SET stripe_session_id = ?, updated_at = datetime('now') WHERE id = ?").run(session.id, req.params.id);
+    await execute("UPDATE weddings SET stripe_session_id = ?, stripe_mode = ?, updated_at = NOW() WHERE id = ?", [session.id, mode, req.params.id]);
 
     res.json({ url: session.url });
   } catch (err) {
+    console.error('Checkout error:', err);
     res.status(500).json({ error: 'Failed to create checkout session' });
   }
 });
 
-router.post('/api/weddings/:id/publish-free', (req, res) => {
+router.post('/api/weddings/:id/publish-free', async (req, res) => {
   try {
-    const wedding = db.prepare('SELECT * FROM weddings WHERE id = ?').get(req.params.id) as Record<string, string> | undefined;
+    const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, string> | undefined;
     if (!wedding) {
       res.status(404).json({ error: 'Wedding not found' });
       return;
     }
 
-    db.prepare("UPDATE weddings SET status = 'published', updated_at = datetime('now') WHERE id = ?").run(wedding.id);
+    await execute("UPDATE weddings SET status = 'published', updated_at = NOW() WHERE id = ?", [wedding.id]);
+
+    const photos = wedding.photos ? JSON.parse(wedding.photos as string) : null;
 
     generateWeddingHtml({
       slug: wedding.slug,
@@ -194,6 +282,7 @@ router.post('/api/weddings/:id/publish-free', (req, res) => {
       story: wedding.story || null,
       menu: wedding.menu || null,
       program: wedding.program || null,
+      photos,
     });
 
     res.json({ url: `/${wedding.slug}` });
@@ -203,20 +292,26 @@ router.post('/api/weddings/:id/publish-free', (req, res) => {
   }
 });
 
-router.get('/api/weddings/:id/guests', (req, res) => {
-  const wedding = db.prepare('SELECT id FROM weddings WHERE id = ?').get(req.params.id);
+router.get('/api/weddings/:id/guests', async (req, res) => {
+  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, string> | undefined;
   if (!wedding) {
     res.status(404).json({ error: 'Wedding not found' });
     return;
   }
 
-  const guests = db.prepare('SELECT * FROM guests WHERE wedding_id = ? ORDER BY created_at DESC').all(req.params.id);
+  const token = req.query.token as string || req.headers['x-wedding-token'] as string;
+  if (wedding.secret_token && token !== wedding.secret_token) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const guests = await query('SELECT * FROM guests WHERE wedding_id = ? ORDER BY created_at DESC', [req.params.id]);
   res.json(guests);
 });
 
-router.post('/api/weddings/:slug/rsvp', (req, res) => {
+router.post('/api/weddings/:slug/rsvp', async (req, res) => {
   try {
-    const wedding = db.prepare('SELECT id FROM weddings WHERE slug = ?').get(req.params.slug) as { id: string } | undefined;
+    const wedding = await queryOne('SELECT id FROM weddings WHERE slug = ?', [req.params.slug]) as { id: string } | undefined;
     if (!wedding) {
       res.status(404).json({ error: 'Wedding not found' });
       return;
@@ -224,25 +319,26 @@ router.post('/api/weddings/:slug/rsvp', (req, res) => {
 
     const { name, email, attending, menu_choice, allergies, plus_one, plus_one_name, message } = req.body;
 
-    if (!name || !attending) {
-      res.status(400).json({ error: 'Name and attending status are required' });
+    if (!name) {
+      res.status(400).json({ error: 'Name is required' });
       return;
     }
 
     const id = nanoid();
 
-    db.prepare(`
-      INSERT INTO guests (id, wedding_id, name, email, attending, menu_choice, allergies, plus_one, plus_one_name, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id, wedding.id, name,
-      email || null,
-      attending,
-      menu_choice || null,
-      allergies || null,
-      plus_one ? 1 : 0,
-      plus_one_name || null,
-      message || null
+    await execute(
+      `INSERT INTO guests (id, wedding_id, name, email, attending, menu_choice, allergies, plus_one, plus_one_name, message)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id, wedding.id, name,
+        email || null,
+        attending || 'yes',
+        menu_choice || null,
+        allergies || null,
+        plus_one ? 1 : 0,
+        plus_one_name || null,
+        message || null,
+      ]
     );
 
     res.status(201).json({ id });

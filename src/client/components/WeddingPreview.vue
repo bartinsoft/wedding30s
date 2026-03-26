@@ -21,48 +21,62 @@
         <div class="preview-bg-pattern" :style="bgPatternStyle"></div>
 
         <section class="preview-hero">
-          <svg class="preview-branch preview-branch-left" viewBox="0 0 140 500" fill="none">
-            <defs>
-              <linearGradient id="prevLeaf1" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" :stop-color="colors.primaryLight" />
-                <stop offset="50%" :stop-color="colors.primary" />
-                <stop offset="100%" :stop-color="colors.primaryDark" />
-              </linearGradient>
-            </defs>
-            <path d="M70 0 C67 50 73 100 66 150 C59 200 76 250 70 300 C64 350 74 400 70 480" stroke="url(#prevLeaf1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <ellipse cx="42" cy="35" rx="30" ry="12" transform="rotate(-35 42 35)" fill="url(#prevLeaf1)" opacity="0.5"/>
-            <ellipse cx="98" cy="75" rx="28" ry="11" transform="rotate(30 98 75)" fill="url(#prevLeaf1)" opacity="0.45"/>
-            <ellipse cx="38" cy="120" rx="32" ry="12" transform="rotate(-40 38 120)" fill="url(#prevLeaf1)" opacity="0.5"/>
-            <ellipse cx="100" cy="165" rx="29" ry="11" transform="rotate(35 100 165)" fill="url(#prevLeaf1)" opacity="0.45"/>
-            <ellipse cx="40" cy="210" rx="30" ry="12" transform="rotate(-30 40 210)" fill="url(#prevLeaf1)" opacity="0.45"/>
-            <ellipse cx="96" cy="255" rx="27" ry="11" transform="rotate(32 96 255)" fill="url(#prevLeaf1)" opacity="0.4"/>
-            <ellipse cx="42" cy="300" rx="28" ry="11" transform="rotate(-35 42 300)" fill="url(#prevLeaf1)" opacity="0.4"/>
-            <ellipse cx="95" cy="345" rx="26" ry="10" transform="rotate(28 95 345)" fill="url(#prevLeaf1)" opacity="0.35"/>
-            <ellipse cx="44" cy="390" rx="25" ry="10" transform="rotate(-28 44 390)" fill="url(#prevLeaf1)" opacity="0.3"/>
-          </svg>
+          <template v-if="decorations === 'branches'">
+            <svg class="preview-branch preview-branch-left" viewBox="0 0 140 500" fill="none">
+              <defs>
+                <linearGradient id="prevLeaf1" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" :stop-color="colors.primaryLight" />
+                  <stop offset="50%" :stop-color="colors.primary" />
+                  <stop offset="100%" :stop-color="colors.primaryDark" />
+                </linearGradient>
+              </defs>
+              <path d="M70 0 C67 50 73 100 66 150 C59 200 76 250 70 300 C64 350 74 400 70 480" stroke="url(#prevLeaf1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="42" cy="35" rx="30" ry="12" transform="rotate(-35 42 35)" fill="url(#prevLeaf1)" opacity="0.5"/>
+              <ellipse cx="98" cy="75" rx="28" ry="11" transform="rotate(30 98 75)" fill="url(#prevLeaf1)" opacity="0.45"/>
+              <ellipse cx="38" cy="120" rx="32" ry="12" transform="rotate(-40 38 120)" fill="url(#prevLeaf1)" opacity="0.5"/>
+              <ellipse cx="100" cy="165" rx="29" ry="11" transform="rotate(35 100 165)" fill="url(#prevLeaf1)" opacity="0.45"/>
+              <ellipse cx="40" cy="210" rx="30" ry="12" transform="rotate(-30 40 210)" fill="url(#prevLeaf1)" opacity="0.45"/>
+              <ellipse cx="96" cy="255" rx="27" ry="11" transform="rotate(32 96 255)" fill="url(#prevLeaf1)" opacity="0.4"/>
+              <ellipse cx="42" cy="300" rx="28" ry="11" transform="rotate(-35 42 300)" fill="url(#prevLeaf1)" opacity="0.4"/>
+              <ellipse cx="95" cy="345" rx="26" ry="10" transform="rotate(28 95 345)" fill="url(#prevLeaf1)" opacity="0.35"/>
+              <ellipse cx="44" cy="390" rx="25" ry="10" transform="rotate(-28 44 390)" fill="url(#prevLeaf1)" opacity="0.3"/>
+            </svg>
+            <svg class="preview-branch preview-branch-right" viewBox="0 0 140 500" fill="none">
+              <path d="M70 0 C73 50 67 100 74 150 C81 200 64 250 70 300 C76 350 66 400 70 480" stroke="url(#prevLeaf1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <ellipse cx="98" cy="40" rx="30" ry="12" transform="rotate(35 98 40)" fill="url(#prevLeaf1)" opacity="0.5"/>
+              <ellipse cx="42" cy="80" rx="28" ry="11" transform="rotate(-30 42 80)" fill="url(#prevLeaf1)" opacity="0.45"/>
+              <ellipse cx="102" cy="125" rx="32" ry="12" transform="rotate(40 102 125)" fill="url(#prevLeaf1)" opacity="0.5"/>
+              <ellipse cx="40" cy="170" rx="29" ry="11" transform="rotate(-35 40 170)" fill="url(#prevLeaf1)" opacity="0.45"/>
+              <ellipse cx="100" cy="215" rx="30" ry="12" transform="rotate(30 100 215)" fill="url(#prevLeaf1)" opacity="0.45"/>
+              <ellipse cx="44" cy="260" rx="27" ry="11" transform="rotate(-32 44 260)" fill="url(#prevLeaf1)" opacity="0.4"/>
+              <ellipse cx="98" cy="305" rx="28" ry="11" transform="rotate(35 98 305)" fill="url(#prevLeaf1)" opacity="0.4"/>
+              <ellipse cx="45" cy="350" rx="26" ry="10" transform="rotate(-28 45 350)" fill="url(#prevLeaf1)" opacity="0.35"/>
+            </svg>
+            <svg class="preview-rings" viewBox="0 0 80 60" fill="none">
+              <circle cx="30" cy="30" r="16" :stroke="colors.accent" stroke-width="2.5" fill="none"/>
+              <circle cx="50" cy="30" r="16" :stroke="colors.accent" stroke-width="2.5" fill="none"/>
+            </svg>
+            <svg v-for="n in 6" :key="'petal-' + n" :class="'preview-petal preview-petal-' + n" viewBox="0 0 20 20" fill="none">
+              <ellipse cx="10" cy="10" rx="4" ry="7.5" :transform="'rotate(' + (n * 15 - 20) + ' 10 10)'" :fill="n % 2 === 0 ? colors.primary : colors.accent" opacity="0.7"/>
+            </svg>
+          </template>
 
-          <svg class="preview-branch preview-branch-right" viewBox="0 0 140 500" fill="none">
-            <path d="M70 0 C73 50 67 100 74 150 C81 200 64 250 70 300 C76 350 66 400 70 480" stroke="url(#prevLeaf1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <ellipse cx="98" cy="40" rx="30" ry="12" transform="rotate(35 98 40)" fill="url(#prevLeaf1)" opacity="0.5"/>
-            <ellipse cx="42" cy="80" rx="28" ry="11" transform="rotate(-30 42 80)" fill="url(#prevLeaf1)" opacity="0.45"/>
-            <ellipse cx="102" cy="125" rx="32" ry="12" transform="rotate(40 102 125)" fill="url(#prevLeaf1)" opacity="0.5"/>
-            <ellipse cx="40" cy="170" rx="29" ry="11" transform="rotate(-35 40 170)" fill="url(#prevLeaf1)" opacity="0.45"/>
-            <ellipse cx="100" cy="215" rx="30" ry="12" transform="rotate(30 100 215)" fill="url(#prevLeaf1)" opacity="0.45"/>
-            <ellipse cx="44" cy="260" rx="27" ry="11" transform="rotate(-32 44 260)" fill="url(#prevLeaf1)" opacity="0.4"/>
-            <ellipse cx="98" cy="305" rx="28" ry="11" transform="rotate(35 98 305)" fill="url(#prevLeaf1)" opacity="0.4"/>
-            <ellipse cx="45" cy="350" rx="26" ry="10" transform="rotate(-28 45 350)" fill="url(#prevLeaf1)" opacity="0.35"/>
-          </svg>
+          <template v-else-if="decorations === 'hearts'">
+            <svg v-for="n in 6" :key="'heart-' + n" :class="'preview-petal preview-petal-' + n" viewBox="0 0 20 20" fill="none">
+              <path d="M10 17 C5 12 1 8 1 5.5 C1 3 3 1 5.5 1 C7.5 1 9 2.5 10 4 C11 2.5 12.5 1 14.5 1 C17 1 19 3 19 5.5 C19 8 15 12 10 17Z" :fill="n % 2 === 0 ? colors.primary : colors.accent" opacity="0.5"/>
+            </svg>
+          </template>
 
-          <svg class="preview-rings" viewBox="0 0 80 60" fill="none">
-            <circle cx="30" cy="30" r="16" :stroke="colors.accent" stroke-width="2.5" fill="none"/>
-            <circle cx="50" cy="30" r="16" :stroke="colors.accent" stroke-width="2.5" fill="none"/>
-            <circle cx="30" cy="30" r="13" :stroke="colors.accentLight" stroke-width="0.8" fill="none" opacity="0.4"/>
-            <circle cx="50" cy="30" r="13" :stroke="colors.accentLight" stroke-width="0.8" fill="none" opacity="0.4"/>
-          </svg>
-
-          <svg v-for="n in 6" :key="'petal-' + n" :class="'preview-petal preview-petal-' + n" viewBox="0 0 20 20" fill="none">
-            <ellipse cx="10" cy="10" rx="4" ry="7.5" :transform="'rotate(' + (n * 15 - 20) + ' 10 10)'" :fill="n % 2 === 0 ? colors.primary : colors.accent" opacity="0.7"/>
-          </svg>
+          <template v-else-if="decorations === 'geometric'">
+            <svg class="preview-deco-corner preview-deco-tl" viewBox="0 0 80 80" fill="none" style="position:absolute;top:8%;left:5%;width:60px;opacity:0.4;">
+              <path d="M0 40 L0 2 L2 0 L40 0" :stroke="colors.accent" stroke-width="1.5" fill="none"/>
+              <circle cx="40" cy="0" r="2" :fill="colors.accent"/>
+            </svg>
+            <svg class="preview-deco-corner preview-deco-br" viewBox="0 0 80 80" fill="none" style="position:absolute;bottom:8%;right:5%;width:60px;opacity:0.4;">
+              <path d="M80 40 L80 78 L78 80 L40 80" :stroke="colors.accent" stroke-width="1.5" fill="none"/>
+              <circle cx="40" cy="80" r="2" :fill="colors.accent"/>
+            </svg>
+          </template>
 
           <div class="preview-hero-content">
             <p class="preview-hero-date-top" :style="{ color: colors.primary }">
@@ -75,7 +89,7 @@
               <span class="preview-ornament-line" :style="{ background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)` }"></span>
             </div>
 
-            <h1 class="preview-hero-names" :style="{ color: colors.text }">
+            <h1 class="preview-hero-names" :style="{ color: colors.primary }">
               {{ displayPartner1 }}
               <span class="preview-ampersand" :style="{ color: colors.accent }">&#38;</span>
               {{ displayPartner2 }}
@@ -126,7 +140,7 @@
           </svg>
         </div>
 
-        <section class="preview-announcement" v-if="form.story" :style="announcementBg">
+        <section ref="storySection" class="preview-announcement" v-if="form.story" :style="announcementBg">
           <div class="preview-announcement-inner">
             <p class="preview-announcement-date" :style="{ color: colors.textLight }">
               {{ displayDate }}
@@ -138,7 +152,7 @@
           </div>
         </section>
 
-        <section class="preview-program" v-if="hasProgram">
+        <section ref="programSection" class="preview-program" v-if="hasProgram">
           <div class="preview-divider">
             <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
               <path d="M0 10 H50" :stroke="colors.accent" stroke-width="0.5" opacity="0.3"/>
@@ -166,7 +180,7 @@
           </div>
         </section>
 
-        <section class="preview-menu" v-if="hasMenu" :style="announcementBg">
+        <section ref="menuSection" class="preview-menu" v-if="hasMenu" :style="announcementBg">
           <div class="preview-divider">
             <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
               <path d="M0 10 H50" :stroke="colors.accent" stroke-width="0.5" opacity="0.3"/>
@@ -179,20 +193,30 @@
 
           <div class="preview-menu-cards">
             <div
-              v-for="course in menuCourses"
-              :key="course.label"
+              v-for="menu in form.menus"
+              :key="menu.name"
               class="preview-menu-card"
               :style="{ borderColor: colors.accent + '25', boxShadow: `0 4px 20px ${colors.text}0a` }"
             >
               <div class="preview-menu-card-top" :style="{ background: `linear-gradient(90deg, ${colors.primaryLight}, ${colors.accentLight}, ${colors.primaryLight})` }"></div>
-              <span class="preview-menu-card-icon">{{ course.icon }}</span>
-              <h3 class="preview-menu-card-title" :style="{ color: colors.text }">{{ course.label }}</h3>
-              <p class="preview-menu-card-desc" :style="{ color: colors.textLight }">{{ course.value }}</p>
+              <h3 class="preview-menu-card-title" :style="{ color: colors.text }">{{ menu.name }}</h3>
+              <div v-for="section in menu.sections" :key="section.name" style="margin-top: 0.5rem;">
+                <p v-if="section.name" style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;" :style="{ color: colors.primary }">
+                  {{ section.name }}
+                  <span v-if="section.choose" style="font-weight: 400; text-transform: none; font-style: italic;"> (a elegir)</span>
+                </p>
+                <p
+                  v-for="item in section.items.filter(i => i.name)"
+                  :key="item.name"
+                  class="preview-menu-card-desc"
+                  :style="{ color: colors.textLight }"
+                >{{ item.name }}</p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section class="preview-rsvp">
+        <section ref="rsvpSection" class="preview-rsvp">
           <div class="preview-divider">
             <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
               <path d="M0 10 H50" :stroke="colors.accent" stroke-width="0.5" opacity="0.3"/>
@@ -234,19 +258,28 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { getPaletteColors, getTemplateById } from '@/config/templates'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 interface ProgramEntry {
   time: string
   description: string
 }
 
+interface MenuItemData {
+  name: string
+}
+
+interface MenuSectionData {
+  name: string
+  items: MenuItemData[]
+  choose: boolean
+}
+
 interface MenuData {
-  starter: string
-  main_course: string
-  dessert: string
-  [key: string]: string
+  name: string
+  sections: MenuSectionData[]
 }
 
 interface FormData {
@@ -258,7 +291,8 @@ interface FormData {
   template: string
   palette: string
   story: string
-  menu: MenuData
+  menuEnabled: boolean
+  menus: MenuData[]
   program: ProgramEntry[]
   photoPreview?: string
 }
@@ -271,99 +305,44 @@ const props = withDefaults(defineProps<{
 })
 
 const scrollContainer = ref<HTMLElement | null>(null)
+const storySection = ref<HTMLElement | null>(null)
+const menuSection = ref<HTMLElement | null>(null)
+const programSection = ref<HTMLElement | null>(null)
+const rsvpSection = ref<HTMLElement | null>(null)
 
-const PALETTES: Record<string, {
-  primary: string
-  primaryLight: string
-  primaryDark: string
-  accent: string
-  accentLight: string
-  bg: string
-  text: string
-  textLight: string
-}> = {
-  'classic-garden': {
-    primary: '#7A8B5E',
-    primaryLight: '#9BAF7C',
-    primaryDark: '#5C6B45',
-    accent: '#C4A35A',
-    accentLight: '#D4BA7A',
-    bg: '#FDFBF7',
-    text: '#2C3E2D',
-    textLight: '#4A5E4B',
-  },
-  'romantic-blush': {
-    primary: '#D4A0A0',
-    primaryLight: '#E8C4C4',
-    primaryDark: '#B07070',
-    accent: '#C4A35A',
-    accentLight: '#D4BA7A',
-    bg: '#FFF5F5',
-    text: '#3D2C2C',
-    textLight: '#6B5050',
-  },
-  'minimal-white': {
-    primary: '#333333',
-    primaryLight: '#999999',
-    primaryDark: '#111111',
-    accent: '#999999',
-    accentLight: '#CCCCCC',
-    bg: '#FFFFFF',
-    text: '#111111',
-    textLight: '#555555',
-  },
-  'navy-elegance': {
-    primary: '#1B3A5C',
-    primaryLight: '#3A6A9C',
-    primaryDark: '#0F2440',
-    accent: '#C4A35A',
-    accentLight: '#D4BA7A',
-    bg: '#F5F5F5',
-    text: '#1B3A5C',
-    textLight: '#3A5070',
-  },
-  'sunset-gold': {
-    primary: '#8B4513',
-    primaryLight: '#A0662F',
-    primaryDark: '#6B3010',
-    accent: '#DAA520',
-    accentLight: '#E8C44A',
-    bg: '#FFF8DC',
-    text: '#4A2810',
-    textLight: '#6B4A30',
-  },
-  'lavender-dream': {
-    primary: '#6B4C7A',
-    primaryLight: '#9B7CAA',
-    primaryDark: '#4A3058',
-    accent: '#C4A35A',
-    accentLight: '#D4BA7A',
-    bg: '#F8F0FF',
-    text: '#3A2848',
-    textLight: '#5E4870',
-  },
+const sectionRefs: Record<string, typeof storySection> = {
+  story: storySection,
+  menu: menuSection,
+  program: programSection,
+  rsvp: rsvpSection,
 }
 
-const PALETTE_MAP: Record<string, string> = {
-  'sage-cream': 'classic-garden',
-  'blush-gold': 'romantic-blush',
-  'mono': 'minimal-white',
-  'navy-gold': 'navy-elegance',
-  'terracotta': 'sunset-gold',
-  'lavender': 'lavender-dream',
+function scrollToSection(section: string) {
+  const el = sectionRefs[section]?.value
+  const container = scrollContainer.value
+  if (el && container) {
+    const containerRect = container.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    const scrollOffset = elRect.top - containerRect.top + container.scrollTop
+    const centered = scrollOffset - (container.clientHeight / 2) + (elRect.height / 2)
+    container.scrollTo({ top: Math.max(0, centered), behavior: 'smooth' })
+  }
 }
 
-const colors = computed(() => {
-  const paletteKey = PALETTE_MAP[props.form.palette] || props.form.palette
-  return PALETTES[paletteKey] || PALETTES['classic-garden']
-})
+defineExpose({ scrollToSection })
+
+const colors = computed(() => getPaletteColors(props.form.palette))
+const templateConfig = computed(() => getTemplateById(props.form.template))
+const decorations = computed(() => templateConfig.value?.decorations || 'branches')
 
 const displayPartner1 = computed(() => props.form.partner1 || 'Emma')
 const displayPartner2 = computed(() => props.form.partner2 || 'James')
 
+const dateLocale = computed(() => locale.value === 'es' ? 'es-ES' : 'en-US')
+
 const displayDate = computed(() => {
-  if (!props.form.date) return 'Your Wedding Date'
-  return new Date(props.form.date + 'T00:00:00').toLocaleDateString('en-US', {
+  if (!props.form.date) return locale.value === 'es' ? 'Tu fecha de boda' : 'Your Wedding Date'
+  return new Date(props.form.date + 'T00:00:00').toLocaleDateString(dateLocale.value, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -372,12 +351,14 @@ const displayDate = computed(() => {
 })
 
 const displayDateShort = computed(() => {
-  if (!props.form.date) return 'MM · DD · YYYY'
+  if (!props.form.date) return 'DD · MM · YYYY'
   const d = new Date(props.form.date + 'T00:00:00')
-  const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+  const month = d.toLocaleDateString(dateLocale.value, { month: 'short' }).toUpperCase()
   const day = d.getDate()
   const year = d.getFullYear()
-  return `${month} · ${day} · ${year}`
+  return locale.value === 'es'
+    ? `${day} · ${month} · ${year}`
+    : `${month} · ${day} · ${year}`
 })
 
 const previewSlug = computed(() => {
@@ -395,17 +376,8 @@ const visibleProgram = computed(() =>
 )
 
 const hasMenu = computed(() => {
-  const m = props.form.menu
-  return m && (m.starter || m.main_course || m.dessert)
-})
-
-const menuCourses = computed(() => {
-  const m = props.form.menu
-  const courses = []
-  if (m.starter) courses.push({ label: t('weddingPreview.starter'), icon: '🥗', value: m.starter })
-  if (m.main_course) courses.push({ label: t('weddingPreview.mainCourse'), icon: '🍽️', value: m.main_course })
-  if (m.dessert) courses.push({ label: t('weddingPreview.dessert'), icon: '🍰', value: m.dessert })
-  return courses
+  return props.form.menuEnabled && props.form.menus.length > 0 &&
+    props.form.menus.some(m => m.sections.some(s => s.items.some(i => i.name)))
 })
 
 const siteStyles = computed(() => ({

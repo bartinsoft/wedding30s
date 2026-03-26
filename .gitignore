@@ -4,3 +4,7 @@ data/
 weddings/
 public/uploads/
 .env
+.env.production
+*.png.bak
+.playwright-mcp/
+*.screenshot.png

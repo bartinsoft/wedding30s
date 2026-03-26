@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{partner1}} & {{partner2}} - ¡Nos Casamos!</title>
+    <meta name="description" content="{{partner1}} & {{partner2}} - {{date_formatted}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: {{color_primary}};
+            --primary-light: color-mix(in srgb, {{color_primary}} 70%, white);
+            --primary-dark: color-mix(in srgb, {{color_primary}} 100%, black 25%);
+            --secondary: {{color_secondary}};
+            --secondary-light: color-mix(in srgb, {{color_secondary}} 70%, white);
+            --secondary-dark: color-mix(in srgb, {{color_secondary}} 100%, black 25%);
+            --bg: {{color_bg}};
+            --bg-dark: color-mix(in srgb, {{color_bg}} 90%, black);
+            --text: {{color_text}};
+            --text-light: color-mix(in srgb, {{color_text}} 70%, white);
+            --accent: #999999;
+            --accent-light: #CCCCCC;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.02;
+            background-image:
+                radial-gradient(circle at 50% 50%, var(--primary) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .section {
+            position: relative;
+            z-index: 1;
+            scroll-snap-align: start;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-auto {
+            min-height: auto;
+            scroll-snap-align: none;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.15s; }
+        .reveal-delay-2 { transition-delay: 0.3s; }
+        .reveal-delay-3 { transition-delay: 0.45s; }
+        .reveal-delay-4 { transition-delay: 0.6s; }
+
+        .hero {
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 1.5rem;
+            scroll-snap-align: start;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hero-date-top {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .hero-names {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 10vw, 7rem);
+            color: var(--text);
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            position: relative;
+            font-weight: 300;
+        }
+
+        .hero-names .ampersand {
+            display: block;
+            font-size: 0.4em;
+            color: var(--accent);
+            line-height: 2;
+            font-weight: 300;
+        }
+
+        .hero-date {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+            letter-spacing: 0.2em;
+            color: var(--text-light);
+            margin-top: 1.5rem;
+            font-weight: 300;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2.5rem;
+        }
+
+        .countdown-item {
+            text-align: center;
+        }
+
+        .countdown-number {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 300;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .countdown-label {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-top: 0.4rem;
+            font-weight: 400;
+        }
+
+        .ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 1.5rem 0;
+        }
+
+        .ornament-line {
+            width: 50px;
+            height: 1px;
+            background: var(--accent-light);
+        }
+
+        .ornament-diamond {
+            display: none;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: gentleBounce 2.5s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        .scroll-indicator span {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--accent);
+            opacity: 0.5;
+        }
+
+        .scroll-arrow {
+            width: 16px;
+            height: 16px;
+            border-right: 1px solid var(--accent);
+            border-bottom: 1px solid var(--accent);
+            transform: rotate(45deg);
+            opacity: 0.3;
+        }
+
+        @keyframes gentleBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        .announcement {
+            padding: 6rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .announcement-inner {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .announcement-date {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+            color: var(--accent);
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .announcement-headline {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            color: var(--text);
+            font-weight: 400;
+            margin-bottom: 2.5rem;
+            line-height: 1.2;
+        }
+
+        .announcement-body {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            line-height: 2;
+            color: var(--text-light);
+            font-weight: 300;
+        }
+
+        .announcement-body strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .announcement-body a {
+            color: var(--primary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--primary-light);
+            transition: opacity 0.3s ease;
+        }
+
+        .announcement-body a:hover {
+            opacity: 0.75;
+        }
+
+        .announcement-body a[href*="maps.google"]::before,
+        .announcement-body a[href*="maps.app.goo.gl"]::before {
+            content: "\uD83D\uDCCD ";
+        }
+
+        .announcement-body a[href^="tel:"]::before {
+            content: "\uD83D\uDCDE ";
+        }
+
+        .announcement-body a[href^="mailto:"]::before {
+            content: "\u2709\uFE0F ";
+        }
+
+        .venue-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid var(--accent-light);
+            padding-bottom: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .venue-link:hover {
+            color: var(--primary-dark);
+            border-bottom-color: var(--primary);
+        }
+
+        .venue-link .pin-icon {
+            display: inline-block;
+            width: 0.85em;
+            height: 0.85em;
+            vertical-align: -0.05em;
+            margin-left: 0.2em;
+            opacity: 0.35;
+            transition: opacity 0.3s ease;
+        }
+
+        .venue-link:hover .pin-icon {
+            opacity: 0.7;
+        }
+
+        .announcement-cta {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            color: var(--primary);
+            font-weight: 400;
+            margin-top: 2.5rem;
+            font-style: italic;
+        }
+
+        .album-section {
+            padding: 3rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .album-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--text);
+            margin-bottom: 0.3rem;
+            font-weight: 400;
+        }
+
+        .album-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+        }
+
+        .album-container {
+            position: relative;
+            max-width: 420px;
+            margin: 0 auto;
+            perspective: 1200px;
+        }
+
+        .album-book {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3/4;
+            transform-style: preserve-3d;
+        }
+
+        .album-page {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.4s ease;
+            transform-origin: left center;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .album-page.flipped {
+            transform: rotateY(-180deg);
+            pointer-events: none;
+        }
+
+        .album-page.behind {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .album-page-inner {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 14px 14px 0;
+        }
+
+        .album-page-img {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            object-fit: cover;
+            border-radius: 2px;
+            display: block;
+        }
+
+        .album-page-footer {
+            flex-shrink: 0;
+            padding: 0.5rem 0;
+            text-align: center;
+        }
+
+        .album-page-year {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: var(--text);
+            font-weight: 300;
+            line-height: 1.2;
+        }
+
+        .album-page-label {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+            color: var(--accent);
+            margin-top: 0.15rem;
+            letter-spacing: 0.05em;
+        }
+
+        .album-page::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0,0,0,0.04) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .album-page:last-child::after {
+            display: none;
+        }
+
+        .album-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .album-nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            border: 1px solid var(--bg-dark);
+            background: white;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .album-nav-btn:hover {
+            border-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .album-nav-btn:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .album-nav-btn:disabled:hover {
+            border-color: var(--bg-dark);
+            color: var(--text-light);
+        }
+
+        .album-dots {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .album-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .album-dot.active {
+            background: var(--primary);
+            transform: scale(1.4);
+        }
+
+        .album-hint {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            color: var(--accent);
+            opacity: 0.4;
+            margin-top: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .menu-section {
+            padding: 4rem 1.5rem 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .menu-section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 6vw, 3rem);
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+        }
+
+        .menu-section-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 2.5rem;
+        }
+
+        .menu-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 4px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-light);
+            opacity: 0.5;
+        }
+
+        .menu-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .menu-card-icon {
+            font-size: 1.6rem;
+        }
+
+        .menu-card-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.3rem, 3.5vw, 1.6rem);
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .menu-phase {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            color: var(--primary-dark);
+            font-weight: 500;
+            font-style: italic;
+            margin: 1.2rem 0 0.4rem;
+        }
+
+        .menu-phase-note {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.75rem, 1.8vw, 0.8rem);
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu-items li {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            color: var(--text-light);
+            padding: 0.35rem 0;
+            padding-left: 1rem;
+            position: relative;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .menu-items li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent-light);
+            transform: translateY(-50%);
+        }
+
+        .menu-items li small {
+            color: var(--text-light);
+            opacity: 0.6;
+            font-size: 0.9em;
+        }
+
+        .menu-interlude {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: var(--accent);
+            text-align: center;
+            margin: 1rem 0;
+            letter-spacing: 0.05em;
+        }
+
+        .menu-extras {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.8rem, 2vw, 0.85rem);
+            color: var(--accent);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .menu-choose-label {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: var(--primary-dark);
+            font-weight: 500;
+            margin: 1rem 0 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .form-section {
+            padding: 3rem 1.5rem 4rem;
+            text-align: center;
+        }
+
+        .form-section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--text);
+            margin-bottom: 0.3rem;
+            font-weight: 400;
+        }
+
+        .form-section-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+        }
+
+        .form-container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .guest-card {
+            background: white;
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            text-align: left;
+            position: relative;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .guest-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .guest-number {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .guest-remove {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            line-height: 1;
+            opacity: 0.4;
+        }
+
+        .guest-remove:hover {
+            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .form-field {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.4rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1px solid var(--bg-dark);
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+            background: var(--bg);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 10%, transparent);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--accent-light);
+        }
+
+        .form-checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .form-checkbox-row label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .plus-one-fields {
+            display: none;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .plus-one-fields.visible {
+            display: block;
+        }
+
+        .submit-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            width: 100%;
+            padding: 1rem 2.5rem;
+            border-radius: 4px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 30%, transparent);
+        }
+
+        .submit-btn svg, .submit-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn:disabled:hover {
+            box-shadow: none;
+            background: var(--primary);
+        }
+
+        .form-note {
+            margin-top: 1.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            color: var(--accent);
+            opacity: 0.5;
+        }
+
+        .rsvp-success {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .rsvp-success.visible {
+            display: block;
+        }
+
+        .rsvp-success-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .rsvp-success-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.4rem, 4vw, 1.8rem);
+            color: var(--text);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .rsvp-success-text {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            color: var(--text-light);
+            font-weight: 300;
+        }
+
+        .rsvp-error {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            background: rgba(200, 50, 50, 0.05);
+            border: 1px solid rgba(200, 50, 50, 0.15);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: #a05050;
+        }
+
+        .rsvp-error.visible {
+            display: block;
+        }
+
+        .footer {
+            padding: 5rem 1.5rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer-hearts {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        .footer-text {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            color: var(--text-light);
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        .footer-names {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--primary);
+            margin-top: 1rem;
+            font-weight: 400;
+        }
+
+        .footer-date-bottom {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            opacity: 0.3;
+            margin-top: 2.5rem;
+        }
+
+        .powered-by {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0,0,0,0.04);
+            text-align: center;
+        }
+
+        .powered-by a {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            color: var(--accent);
+            opacity: 0.3;
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            transition: opacity 0.3s ease;
+        }
+
+        .powered-by a:hover {
+            opacity: 0.6;
+        }
+
+        .section-divider {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 0;
+            scroll-snap-align: none;
+            min-height: auto;
+        }
+
+        .section-divider-line {
+            width: 60px;
+            height: 1px;
+            background: var(--accent-light);
+        }
+
+        @media (min-width: 768px) {
+            .menu-cards {
+                flex-direction: row;
+            }
+
+            .menu-card {
+                flex: 1;
+            }
+
+            .announcement {
+                padding: 8rem 2rem;
+            }
+
+            .menu-section {
+                padding: 5rem 2rem 4rem;
+            }
+
+            .form-section {
+                padding: 4rem 2rem 5rem;
+            }
+
+            .ornament-line {
+                width: 70px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hero {
+                min-height: 100vh;
+            }
+
+            .announcement {
+                padding: 10rem 2rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hero-names {
+                font-size: 2.6rem;
+            }
+
+            .countdown {
+                gap: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-pattern"></div>
+
+<section class="hero section">
+    <div class="hero-content">
+        <p class="hero-date-top reveal">{{date_short}}</p>
+
+        <div class="ornament reveal reveal-delay-1">
+            <span class="ornament-line"></span>
+            <span class="ornament-diamond"></span>
+            <span class="ornament-line"></span>
+        </div>
+
+        <h1 class="hero-names reveal reveal-delay-1">
+            {{partner1}}
+            <span class="ampersand">&amp;</span>
+            {{partner2}}
+        </h1>
+
+        <div class="ornament reveal reveal-delay-2">
+            <span class="ornament-line"></span>
+            <span class="ornament-diamond"></span>
+            <span class="ornament-line"></span>
+        </div>
+
+        <p class="hero-date reveal reveal-delay-2">{{location}}</p>
+
+        <div class="countdown reveal reveal-delay-3" id="countdown">
+            <div class="countdown-item">
+                <div class="countdown-number" id="cd-days">--</div>
+                <div class="countdown-label">{{t_countdown_days}}</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="cd-hours">--</div>
+                <div class="countdown-label">{{t_countdown_hours}}</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="cd-mins">--</div>
+                <div class="countdown-label">{{t_countdown_min}}</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="cd-secs">--</div>
+                <div class="countdown-label">{{t_countdown_sec}}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-indicator">
+        <span>{{t_scroll}}</span>
+        <div class="scroll-arrow"></div>
+    </div>
+</section>
+
+<div class="section-divider">
+    <span class="section-divider-line"></span>
+</div>
+
+{{#story}}
+<section class="announcement section">
+    <div class="announcement-inner">
+        <p class="announcement-date reveal">{{t_story_prefix}} {{date_formatted}}</p>
+        <h2 class="announcement-headline reveal reveal-delay-1">{{t_story_headline}}</h2>
+        <div class="announcement-body reveal reveal-delay-2">
+            {{story}}
+        </div>
+        <p class="announcement-cta reveal reveal-delay-3">{{t_story_cta}}</p>
+    </div>
+</section>
+
+<div class="section-divider">
+    <span class="section-divider-line"></span>
+</div>
+{{/story}}
+
+{{#gallery_html}}
+<section class="album-section section">
+    <h2 class="album-title reveal">{{t_gallery_title}}</h2>
+    <p class="album-subtitle reveal reveal-delay-1">{{t_gallery_subtitle}}</p>
+
+    <div class="album-container reveal reveal-delay-2">
+        <div class="album-book" id="album-book">
+            {{gallery_html}}
+        </div>
+    </div>
+
+    <div class="album-nav reveal reveal-delay-3">
+        <button class="album-nav-btn" id="album-prev" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="album-dots" id="album-dots"></div>
+        <button class="album-nav-btn" id="album-next">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+    </div>
+    <p class="album-hint">Toca la foto o usa las flechas</p>
+</section>
+
+<div class="section-divider">
+    <span class="section-divider-line"></span>
+</div>
+{{/gallery_html}}
+
+{{#menu_html}}
+<section class="menu-section section">
+    <h2 class="menu-section-title reveal">El Banquete</h2>
+    <p class="menu-section-subtitle reveal reveal-delay-1">{{venue}}</p>
+
+    <div class="menu-cards">
+        {{menu_html}}
+    </div>
+</section>
+
+<div class="section-divider">
+    <span class="section-divider-line"></span>
+</div>
+{{/menu_html}}
+
+<section class="form-section section">
+    <h2 class="form-section-title reveal">{{t_rsvp_title}}</h2>
+    <p class="form-section-subtitle reveal reveal-delay-1">{{t_rsvp_subtitle}}</p>
+
+    <div class="form-container reveal reveal-delay-2">
+        <form id="rsvp-form">
+            <div class="form-field">
+                <label class="form-label" for="rsvp-name">{{t_rsvp_name_label}}</label>
+                <input type="text" id="rsvp-name" name="name" class="form-input" placeholder="{{t_rsvp_name_placeholder}}" required>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label" for="rsvp-email">{{t_rsvp_email_label}}</label>
+                <input type="email" id="rsvp-email" name="email" class="form-input" placeholder="{{t_rsvp_email_placeholder}}">
+            </div>
+
+            {{#has_menu_choices}}
+            <div class="form-field">
+                <label class="form-label" for="rsvp-menu">{{t_rsvp_menu_label}}</label>
+                <select id="rsvp-menu" name="menu_choice" class="form-select">
+                    <option value="">{{t_rsvp_menu_placeholder}}</option>
+                    {{menu_options}}
+                </select>
+            </div>
+            {{/has_menu_choices}}
+
+            <div class="form-field">
+                <label class="form-label" for="rsvp-allergies">{{t_rsvp_allergies_label}}</label>
+                <input type="text" id="rsvp-allergies" name="allergies" class="form-input" placeholder="{{t_rsvp_allergies_placeholder}}">
+            </div>
+
+            <div class="form-checkbox-row">
+                <input type="checkbox" id="rsvp-plus-one" name="plus_one" onchange="togglePlusOne(this)">
+                <label for="rsvp-plus-one">{{t_rsvp_plus_one}}</label>
+            </div>
+
+            <div class="plus-one-fields" id="plus-one-fields">
+                <div class="form-field">
+                    <label class="form-label" for="rsvp-plus-one-name">{{t_rsvp_plus_one_name}}</label>
+                    <input type="text" id="rsvp-plus-one-name" name="plus_one_name" class="form-input" placeholder="{{t_rsvp_plus_one_placeholder}}">
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label" for="rsvp-message">{{t_rsvp_message_label}}</label>
+                <textarea id="rsvp-message" name="message" class="form-textarea" placeholder="{{t_rsvp_allergies_placeholder}}"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                </svg>
+                <span>{{t_rsvp_submit}}</span>
+            </button>
+
+            <div class="rsvp-error" id="rsvp-error"></div>
+        </form>
+
+        <div class="rsvp-success" id="rsvp-success">
+            <div class="rsvp-success-icon">💒</div>
+            <p class="rsvp-success-title">{{t_rsvp_success_title}}</p>
+            <p class="rsvp-success-text">{{t_rsvp_success_text}}</p>
+        </div>
+
+        <p class="form-note">{{t_rsvp_note}}</p>
+    </div>
+</section>
+
+<footer class="footer section section-auto">
+    <div class="ornament reveal">
+        <span class="ornament-line"></span>
+        <span class="ornament-diamond"></span>
+        <span class="ornament-line"></span>
+    </div>
+    <p class="footer-text reveal reveal-delay-1">{{t_footer_text}}</p>
+    <p class="footer-names reveal reveal-delay-2">{{partner1}} & {{partner2}}</p>
+    <p class="footer-date-bottom reveal reveal-delay-3">{{date_formatted}}</p>
+
+    <div class="powered-by">
+        <a href="https://wedding30s.com" target="_blank" rel="noopener">{{t_powered_by}}</a>
+    </div>
+</footer>
+
+<script>
+    var WEDDING_DATE = '{{date_iso}}';
+    var WEDDING_SLUG = '{{slug}}';
+
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+
+    var scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                scrollIndicator.style.opacity = '0';
+                scrollIndicator.style.transition = 'opacity 0.5s ease';
+            } else {
+                scrollIndicator.style.opacity = '1';
+            }
+        }, { passive: true });
+    }
+
+    function updateCountdown() {
+        var target = new Date(WEDDING_DATE).getTime();
+        var now = Date.now();
+        var diff = target - now;
+
+        if (diff <= 0) {
+            document.getElementById('cd-days').textContent = '0';
+            document.getElementById('cd-hours').textContent = '0';
+            document.getElementById('cd-mins').textContent = '0';
+            document.getElementById('cd-secs').textContent = '0';
+            return;
+        }
+
+        var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        var secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('cd-days').textContent = days;
+        document.getElementById('cd-hours').textContent = hours;
+        document.getElementById('cd-mins').textContent = mins;
+        document.getElementById('cd-secs').textContent = secs;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    function togglePlusOne(checkbox) {
+        var fields = document.getElementById('plus-one-fields');
+        if (checkbox.checked) {
+            fields.classList.add('visible');
+        } else {
+            fields.classList.remove('visible');
+        }
+    }
+
+    var rsvpForm = document.getElementById('rsvp-form');
+    if (rsvpForm) {
+        rsvpForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var btn = document.getElementById('submit-btn');
+            var errorEl = document.getElementById('rsvp-error');
+            btn.disabled = true;
+            errorEl.classList.remove('visible');
+
+            var formData = new FormData(rsvpForm);
+            var data = {};
+            formData.forEach(function(value, key) { data[key] = value; });
+
+            data.plus_one = document.getElementById('rsvp-plus-one').checked;
+
+            fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function(res) {
+                if (!res.ok) {
+                    return res.json().then(function(body) { throw new Error(body.error || 'Error al enviar'); });
+                }
+                return res.json();
+            })
+            .then(function() {
+                rsvpForm.style.display = 'none';
+                document.getElementById('rsvp-success').classList.add('visible');
+            })
+            .catch(function(err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.add('visible');
+                btn.disabled = false;
+            });
+        });
+    }
+
+    var albumPages = document.querySelectorAll('.album-page');
+    if (albumPages.length > 0) {
+        var albumCurrent = 0;
+        var albumTotal = albumPages.length;
+        var dotsContainer = document.getElementById('album-dots');
+        var prevBtn = document.getElementById('album-prev');
+        var nextBtn = document.getElementById('album-next');
+
+        function initAlbum() {
+            for (var i = 0; i < albumTotal; i++) {
+                var dot = document.createElement('button');
+                dot.className = 'album-dot' + (i === 0 ? ' active' : '');
+                dot.dataset.index = i;
+                dot.onclick = function() { goToAlbumPage(parseInt(this.dataset.index)); };
+                dotsContainer.appendChild(dot);
+            }
+            updateAlbumPages();
+        }
+
+        function updateAlbumPages() {
+            albumPages.forEach(function(page, i) {
+                page.classList.remove('flipped', 'behind');
+                if (i < albumCurrent) {
+                    page.classList.add('flipped');
+                }
+                page.style.zIndex = i < albumCurrent ? i : albumTotal - i;
+            });
+
+            var dots = dotsContainer.querySelectorAll('.album-dot');
+            dots.forEach(function(d, i) {
+                d.classList.toggle('active', i === albumCurrent);
+            });
+
+            prevBtn.disabled = albumCurrent === 0;
+            nextBtn.disabled = albumCurrent === albumTotal - 1;
+        }
+
+        function albumNext() {
+            if (albumCurrent < albumTotal - 1) {
+                albumCurrent++;
+                updateAlbumPages();
+            }
+        }
+
+        function albumPrev() {
+            if (albumCurrent > 0) {
+                albumCurrent--;
+                updateAlbumPages();
+            }
+        }
+
+        function goToAlbumPage(index) {
+            albumCurrent = index;
+            updateAlbumPages();
+        }
+
+        prevBtn.onclick = albumPrev;
+        nextBtn.onclick = albumNext;
+
+        albumPages.forEach(function(page) {
+            page.addEventListener('click', function() {
+                var idx = parseInt(this.dataset.index);
+                if (idx === albumCurrent && albumCurrent < albumTotal - 1) {
+                    albumNext();
+                }
+            });
+        });
+
+        var albumBook = document.getElementById('album-book');
+        var touchStartX = 0;
+
+        albumBook.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        albumBook.addEventListener('touchend', function(e) {
+            var diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) albumNext();
+                else albumPrev();
+            }
+        }, { passive: true });
+
+        initAlbum();
+    }
+</script>
+
+</body>
+</html>

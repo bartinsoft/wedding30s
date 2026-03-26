@@ -1,11 +1,32 @@
 import { Router } from 'express';
-import db from '../db/index.js';
+import { queryOne, execute } from '../db/index.js';
 import { generateWeddingHtml } from '../generator.js';
 
 const router = Router();
 
+function tryVerifyWebhook(Stripe: any, body: any, sig: string) {
+  const configs = [
+    { key: process.env.STRIPE_SECRET_KEY_TEST, secret: process.env.STRIPE_WEBHOOK_SECRET_TEST, mode: 'test' },
+    { key: process.env.STRIPE_SECRET_KEY, secret: process.env.STRIPE_WEBHOOK_SECRET, mode: 'live' },
+  ].filter(c => c.key && c.secret);
+
+  for (const config of configs) {
+    try {
+      const stripe = new Stripe(config.key);
+      const event = stripe.webhooks.constructEvent(body, sig, config.secret);
+      return { event, mode: config.mode };
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
 router.post('/api/webhooks/stripe', async (req, res) => {
-  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+  const hasAnyKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY_TEST;
+  const hasAnySecret = process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET_TEST;
+
+  if (!hasAnyKey || !hasAnySecret) {
     console.warn('Stripe keys not configured, skipping webhook verification');
     res.status(200).json({ received: true, skipped: true });
     return;
@@ -13,27 +34,27 @@ router.post('/api/webhooks/stripe', async (req, res) => {
 
   try {
     const Stripe = (await import('stripe')).default;
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const sig = req.headers['stripe-signature'] as string;
 
-    let event: InstanceType<typeof Stripe>['webhooks'] extends { constructEvent: (...args: any[]) => infer R } ? R : never;
-
-    try {
-      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    } catch {
+    const result = tryVerifyWebhook(Stripe, req.body, sig);
+    if (!result) {
       res.status(400).send('Webhook signature verification failed');
       return;
     }
 
+    const { event } = result;
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
 
-      const wedding = db.prepare('SELECT * FROM weddings WHERE stripe_session_id = ?').get((session as any).id) as Record<string, string> | undefined;
+      const wedding = await queryOne('SELECT * FROM weddings WHERE stripe_session_id = ?', [(session as any).id]) as Record<string, string> | undefined;
 
       if (wedding) {
-        db.prepare("UPDATE weddings SET status = 'published', updated_at = datetime('now') WHERE id = ?").run(wedding.id);
+        await execute("UPDATE weddings SET status = 'published', updated_at = NOW() WHERE id = ?", [wedding.id]);
 
         try {
+          const photos = wedding.photos ? JSON.parse(wedding.photos as string) : null;
+
           generateWeddingHtml({
             slug: wedding.slug,
             partner1_name: wedding.partner1_name,
@@ -47,6 +68,7 @@ router.post('/api/webhooks/stripe', async (req, res) => {
             story: wedding.story || null,
             menu: wedding.menu || null,
             program: wedding.program || null,
+            photos,
           });
         } catch (err) {
           console.error('Failed to generate wedding HTML:', err);

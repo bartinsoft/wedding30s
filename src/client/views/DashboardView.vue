@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-gray-950 text-white">
     <nav class="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <router-link to="/" class="font-script text-2xl text-gold-400">Wedding30s</router-link>
-        <router-link :to="`/create?id=${id}`" class="text-sm text-gold-400 hover:text-gold-300 transition-colors">
+        <router-link to="/"><img src="/logo.png" alt="Wedding30s" class="h-20 brightness-[2]" /></router-link>
+        <router-link :to="`/create?id=${id}&token=${token}`" class="text-sm text-gold-400 hover:text-gold-300 transition-colors">
           {{ $t('dashboard.editWebsite') }}
         </router-link>
       </div>
@@ -19,7 +19,7 @@
         <div class="mb-12">
           <p class="font-script text-gold-400 text-2xl mb-2">{{ $t('dashboard.yourWeddingWebsite') }}</p>
           <h1 class="font-serif text-4xl md:text-5xl text-white">
-            {{ wedding?.partner1 }} & {{ wedding?.partner2 }}
+            {{ wedding?.partner1_name }} & {{ wedding?.partner2_name }}
           </h1>
         </div>
 
@@ -129,12 +129,17 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ id: string }>()
+const route = useRoute()
+const { locale } = useI18n()
+const token = computed(() => (route.query.token as string) || '')
 
 interface Wedding {
-  partner1: string
-  partner2: string
+  partner1_name: string
+  partner2_name: string
   date: string
   slug: string
   location: string
@@ -162,7 +167,8 @@ const weddingUrl = computed(() => {
 
 const formattedDate = computed(() => {
   if (!wedding.value?.date) return ''
-  return new Date(wedding.value.date + 'T00:00:00').toLocaleDateString('en-US', {
+  const loc = locale.value === 'es' ? 'es-ES' : 'en-US'
+  return new Date(wedding.value.date + 'T00:00:00').toLocaleDateString(loc, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -198,9 +204,10 @@ async function copyUrl() {
 
 onMounted(async () => {
   try {
+    const tp = token.value ? `?token=${token.value}` : ''
     const [weddingRes, guestsRes] = await Promise.all([
-      fetch(`/api/weddings/${props.id}`),
-      fetch(`/api/weddings/${props.id}/guests`),
+      fetch(`/api/weddings/${props.id}${tp}`),
+      fetch(`/api/weddings/${props.id}/guests${tp}`),
     ])
     wedding.value = await weddingRes.json()
     guests.value = await guestsRes.json()

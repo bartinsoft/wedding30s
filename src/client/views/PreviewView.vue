@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-950 text-white">
     <nav class="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <router-link to="/" class="font-script text-2xl text-gold-400">Wedding30s</router-link>
+        <router-link to="/"><img src="/logo.png" alt="Wedding30s" class="h-20 brightness-[2]" /></router-link>
         <div class="flex items-center gap-4">
           <span class="text-sm text-gray-400">{{ $t('preview.previewMode') }}</span>
           <router-link to="/create" class="btn-primary text-sm py-2 px-6">
@@ -63,8 +63,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ id: string }>()
+const { locale } = useI18n()
 
 interface Wedding {
   partner1: string
@@ -84,7 +86,8 @@ const previewUrl = computed(() => {
 
 const formattedDate = computed(() => {
   if (!wedding.value?.date) return ''
-  return new Date(wedding.value.date + 'T00:00:00').toLocaleDateString('en-US', {
+  const loc = locale.value === 'es' ? 'es-ES' : 'en-US'
+  return new Date(wedding.value.date + 'T00:00:00').toLocaleDateString(loc, {
     month: 'long',
     day: 'numeric',
     year: 'numeric',

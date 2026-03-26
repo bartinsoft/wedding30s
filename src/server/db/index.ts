@@ -1,18 +1,27 @@
-import Database from 'better-sqlite3';
-import path from 'node:path';
-import fs from 'node:fs';
-import { schema } from './schema.js';
+import mysql from 'mysql2/promise';
 
-const dataDir = path.resolve('data');
-fs.mkdirSync(dataDir, { recursive: true });
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || '127.0.0.1',
+  port: parseInt(process.env.DB_PORT || '3306', 10),
+  user: process.env.DB_USER || 'wedding30s',
+  password: process.env.DB_PASSWORD || 'wedding30s_dev',
+  database: process.env.DB_NAME || 'wedding30s',
+  waitForConnections: true,
+  connectionLimit: 10,
+});
 
-const dbPath = path.resolve('data', 'wedding30s.db');
+export async function query(sql: string, params: unknown[] = []): Promise<unknown[]> {
+  const [rows] = await pool.execute(sql, params as any[]);
+  return rows as unknown[];
+}
 
-const db = new Database(dbPath);
+export async function queryOne(sql: string, params: unknown[] = []): Promise<Record<string, unknown> | undefined> {
+  const rows = await query(sql, params);
+  return (rows as Record<string, unknown>[])[0];
+}
 
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+export async function execute(sql: string, params: unknown[] = []): Promise<void> {
+  await pool.execute(sql, params as any[]);
+}
 
-db.exec(schema);
-
-export default db;
+export default pool;

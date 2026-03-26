@@ -28,6 +28,21 @@ interface MenuSection {
   note?: string;
 }
 
+interface NewMenuItem {
+  name: string;
+}
+
+interface NewMenuSection {
+  name: string;
+  items: NewMenuItem[];
+  choose: boolean;
+}
+
+interface NewMenu {
+  name: string;
+  sections: NewMenuSection[];
+}
+
 const MONTHS_ES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
@@ -134,16 +149,52 @@ function formatDateIso(dateStr: string): string {
   return d.toISOString();
 }
 
+function isNewMenuFormat(data: unknown[]): data is NewMenu[] {
+  return data.length > 0 && 'sections' in (data[0] as Record<string, unknown>);
+}
+
 function generateMenuHtml(menuJson: string): string {
-  let sections: MenuSection[];
+  let parsed: unknown[];
   try {
-    sections = JSON.parse(menuJson);
+    parsed = JSON.parse(menuJson);
   } catch {
     return '';
   }
 
-  if (!Array.isArray(sections) || sections.length === 0) return '';
+  if (!Array.isArray(parsed) || parsed.length === 0) return '';
 
+  if (isNewMenuFormat(parsed)) {
+    return (parsed as NewMenu[]).map((menu, i) => {
+      const delayClass = `reveal reveal-delay-${Math.min(i + 2, 4)}`;
+      let inner = '';
+
+      inner += `<div class="menu-card-header">`;
+      inner += `<span class="menu-card-icon">🍽️</span>`;
+      inner += `<span class="menu-card-title">${menu.name}</span>`;
+      inner += `</div>`;
+
+      for (const section of menu.sections) {
+        if (section.name) {
+          inner += `<p class="menu-phase">${section.name}</p>`;
+        }
+        if (section.choose) {
+          inner += `<p class="menu-choose-label">{{t_menu_choose}}</p>`;
+        }
+        const filledItems = section.items.filter(item => item.name);
+        if (filledItems.length > 0) {
+          inner += `<ul class="menu-items">`;
+          for (const item of filledItems) {
+            inner += `<li>${item.name}</li>`;
+          }
+          inner += `</ul>`;
+        }
+      }
+
+      return `<div class="menu-card ${delayClass}">${inner}</div>`;
+    }).join('\n        ');
+  }
+
+  const sections = parsed as MenuSection[];
   return sections.map((section, i) => {
     const delayClass = `reveal reveal-delay-${Math.min(i + 2, 4)}`;
     let inner = '';
@@ -195,35 +246,55 @@ function generateMenuHtml(menuJson: string): string {
 }
 
 function generateMenuOptions(menuJson: string): string {
-  let sections: MenuSection[];
+  let parsed: unknown[];
   try {
-    sections = JSON.parse(menuJson);
+    parsed = JSON.parse(menuJson);
   } catch {
     return '';
   }
 
-  if (!Array.isArray(sections) || sections.length === 0) return '';
+  if (!Array.isArray(parsed) || parsed.length === 0) return '';
 
   const options: string[] = [];
 
-  for (const section of sections) {
-    options.push(`<option disabled>── ${section.title} ──</option>`);
-
-    if (section.phases) {
-      for (const phase of section.phases) {
-        if (phase.choose) {
-          for (const item of phase.items) {
-            const clean = item.replace(/<[^>]*>/g, '');
-            options.push(`<option value="${clean}">${clean}</option>`);
+  if (isNewMenuFormat(parsed)) {
+    for (const menu of parsed as NewMenu[]) {
+      if ((parsed as NewMenu[]).length > 1) {
+        options.push(`<option disabled>── ${menu.name} ──</option>`);
+      }
+      for (const section of menu.sections) {
+        if (section.choose) {
+          if (section.name) {
+            options.push(`<option disabled>── ${section.name} ──</option>`);
+          }
+          for (const item of section.items) {
+            if (item.name) {
+              options.push(`<option value="${item.name}">${item.name}</option>`);
+            }
           }
         }
       }
     }
+  } else {
+    for (const section of parsed as MenuSection[]) {
+      options.push(`<option disabled>── ${section.title} ──</option>`);
 
-    if (section.items) {
-      for (const item of section.items) {
-        const clean = item.replace(/<[^>]*>/g, '');
-        options.push(`<option value="${clean}">${clean}</option>`);
+      if (section.phases) {
+        for (const phase of section.phases) {
+          if (phase.choose) {
+            for (const item of phase.items) {
+              const clean = item.replace(/<[^>]*>/g, '');
+              options.push(`<option value="${clean}">${clean}</option>`);
+            }
+          }
+        }
+      }
+
+      if (section.items) {
+        for (const item of section.items) {
+          const clean = item.replace(/<[^>]*>/g, '');
+          options.push(`<option value="${clean}">${clean}</option>`);
+        }
       }
     }
   }

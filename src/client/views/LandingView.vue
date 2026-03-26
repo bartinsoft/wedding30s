@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-950 text-white">
     <nav class="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <span class="font-script text-2xl text-gold-400">Wedding30s</span>
+        <img src="/logo.png" alt="Wedding30s" class="h-20 brightness-[2]" />
         <div class="flex items-center gap-3">
           <button
             @click="toggleLocale"
@@ -93,22 +93,23 @@
         <p class="section-subtitle">{{ $t('landing.chooseStyleSubtitle') }}</p>
 
         <div class="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div
+          <router-link
             v-for="tpl in templates"
             :key="tpl.nameKey"
-            class="group cursor-pointer"
+            :to="`/create?template=${tpl.id}`"
+            class="group cursor-pointer block"
           >
             <div class="relative rounded-xl overflow-hidden border border-white/5
                         group-hover:border-gold-400/30 transition-all duration-500
                         group-hover:shadow-lg group-hover:shadow-gold-500/5">
               <div
                 class="aspect-[3/4] flex items-center justify-center p-8"
-                :class="tpl.bg"
+                :style="{ background: getTemplateThumbnailColors(tpl).bg }"
               >
                 <div class="text-center">
-                  <p :class="[tpl.scriptColor, 'font-script text-2xl']">Emma & James</p>
-                  <div class="w-12 h-px mx-auto my-3" :class="tpl.lineColor"></div>
-                  <p :class="[tpl.textColor, 'font-serif text-sm tracking-widest uppercase']">
+                  <p class="font-script text-2xl" :style="{ color: getTemplateThumbnailColors(tpl).primary }">Emma & James</p>
+                  <div class="w-12 h-px mx-auto my-3" :style="{ background: getTemplateThumbnailColors(tpl).accent }"></div>
+                  <p class="font-serif text-sm tracking-widest uppercase" :style="{ color: getTemplateThumbnailColors(tpl).textLight }">
                     June 15, 2026
                   </p>
                 </div>
@@ -120,7 +121,7 @@
             </div>
             <h3 class="mt-4 font-serif text-lg text-white">{{ $t('landing.' + tpl.nameKey) }}</h3>
             <p class="text-sm text-gray-500">{{ $t('landing.' + tpl.tagKey) }}</p>
-          </div>
+          </router-link>
         </div>
       </div>
     </section>
@@ -187,7 +188,7 @@
     <footer class="py-16 px-6 border-t border-white/5">
       <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="text-center md:text-left">
-          <span class="font-script text-2xl text-gold-400">Wedding30s</span>
+          <img src="/logo.png" alt="Wedding30s" class="h-20 brightness-[2]" />
           <p class="text-gray-500 text-sm mt-2">&copy; {{ new Date().getFullYear() }} wedding30s.com</p>
         </div>
         <div class="flex gap-6">
@@ -204,6 +205,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLocale } from '@/i18n'
+import { TEMPLATES, getTemplateThumbnailColors } from '@/config/templates'
 
 const { t, locale } = useI18n()
 
@@ -217,40 +219,7 @@ const steps = computed(() => [
   { title: t('landing.step3Title'), description: t('landing.step3Desc') },
 ])
 
-const templates = [
-  {
-    nameKey: 'classicGarden',
-    tagKey: 'classicGardenTag',
-    bg: 'bg-gradient-to-br from-cream-50 to-sage-100',
-    scriptColor: 'text-sage-600',
-    lineColor: 'bg-sage-400',
-    textColor: 'text-sage-500',
-  },
-  {
-    nameKey: 'minimalWhite',
-    tagKey: 'minimalWhiteTag',
-    bg: 'bg-white',
-    scriptColor: 'text-gray-700',
-    lineColor: 'bg-gray-300',
-    textColor: 'text-gray-500',
-  },
-  {
-    nameKey: 'romanticBlush',
-    tagKey: 'romanticBlushTag',
-    bg: 'bg-gradient-to-br from-blush-50 to-cream-100',
-    scriptColor: 'text-blush-500',
-    lineColor: 'bg-blush-300',
-    textColor: 'text-blush-400',
-  },
-  {
-    nameKey: 'modernDark',
-    tagKey: 'modernDarkTag',
-    bg: 'bg-gradient-to-br from-gray-900 to-gray-800',
-    scriptColor: 'text-gold-400',
-    lineColor: 'bg-gold-400',
-    textColor: 'text-gold-300',
-  },
-]
+const templates = TEMPLATES
 
 const features = [
   { icon: '📱', titleKey: 'featureQrTitle', descKey: 'featureQrDesc' },
