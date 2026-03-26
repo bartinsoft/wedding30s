@@ -26,7 +26,7 @@ if (fs.existsSync(clientDist)) {
 }
 
 app.get('/media/*', async (req, res) => {
-  const key = req.params[0];
+  const key = req.url.replace('/media/', '');
   const result = await getFromS3(key);
   if (!result) {
     res.status(404).send('Not found');
