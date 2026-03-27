@@ -4,6 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import weddingsRouter from './routes/weddings.js';
 import webhooksRouter from './routes/webhooks.js';
+import sitemapRouter from './routes/sitemap.js';
 import { getFromS3 } from './storage/s3.js';
 
 for (const dir of ['data', 'public/uploads/tmp', 'weddings', 'templates']) {
@@ -38,6 +39,7 @@ app.get('/media/*', async (req, res) => {
 });
 
 app.use(webhooksRouter);
+app.use(sitemapRouter);
 app.use(weddingsRouter);
 
 app.get('/:slug', (req, res, next) => {

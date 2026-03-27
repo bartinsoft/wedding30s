@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /preview/
+Disallow: /dashboard/
+
+Sitemap: https://wedding30s.com/sitemap.xml
