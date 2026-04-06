@@ -97,7 +97,9 @@ const TEMPLATE_STRINGS: Record<string, Record<string, string>> = {
     page_title: '¡Nos Casamos!',
     add_to_calendar: 'Añadir al calendario',
     open_in_maps: 'Abrir en Maps',
+    menu_title: 'El Banquete',
     menu_choose: '✦ A elegir entre:',
+    rsvp_note: '',
   },
   en: {
     countdown_days: 'Days',
@@ -139,7 +141,9 @@ const TEMPLATE_STRINGS: Record<string, Record<string, string>> = {
     page_title: 'We\'re Getting Married!',
     add_to_calendar: 'Add to Calendar',
     open_in_maps: 'Open in Maps',
+    menu_title: 'The Menu',
     menu_choose: '✦ Choose from:',
+    rsvp_note: '',
   },
 };
 

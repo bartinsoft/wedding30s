@@ -57,6 +57,15 @@ async function seedDemo() {
         { name: 'Dolce', items: [{ name: 'Tiramisù' }, { name: 'Panna cotta' }], choose: false },
       ],
     },
+    {
+      name: 'Vegan Menu',
+      sections: [
+        { name: 'Antipasto', items: [{ name: 'Grilled vegetables with balsamic reduction' }, { name: 'Bruschetta with cherry tomatoes' }], choose: false },
+        { name: 'Primo', items: [{ name: 'Penne arrabbiata' }, { name: 'Risotto with asparagus & lemon' }], choose: true },
+        { name: 'Secondo', items: [{ name: 'Stuffed bell peppers' }, { name: 'Eggplant parmigiana' }], choose: true },
+        { name: 'Dolce', items: [{ name: 'Sorbetto al limone' }, { name: 'Fresh fruit tartlet' }], choose: false },
+      ],
+    },
   ]);
 
   await execute(
@@ -74,7 +83,7 @@ async function seedDemo() {
     ]
   );
 
-  await generateWeddingHtml({
+  const outPath = await generateWeddingHtml({
     slug: DEMO_SLUG,
     partner1_name: 'Emma',
     partner2_name: 'James',
@@ -90,7 +99,12 @@ async function seedDemo() {
     language: 'en',
   });
 
-  console.log(`Demo wedding created: /${DEMO_SLUG}`);
+  // Wait for S3 upload (generateWeddingHtml fires it in background)
+  const fs = await import('fs');
+  const { uploadWeddingHtml } = await import('../storage/s3.js');
+  const html = fs.readFileSync(outPath, 'utf-8');
+  await uploadWeddingHtml(DEMO_SLUG, html);
+  console.log(`Demo wedding created and uploaded to S3: /${DEMO_SLUG}`);
   process.exit(0);
 }
 

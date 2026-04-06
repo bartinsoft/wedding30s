@@ -1000,6 +1000,196 @@
             opacity: 0;
         }
 
+        .guest-card {
+            background: transparent;
+            border-radius: 0;
+            padding: 1.5rem 0;
+            margin-bottom: 0.5rem;
+            border: none;
+            border-bottom: 1px solid color-mix(in srgb, var(--primary) 15%, transparent);
+            text-align: left;
+            position: relative;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        .guest-card:last-child {
+            border-bottom: none;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .guest-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .guest-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .guest-remove {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            line-height: 1;
+            opacity: 0.5;
+        }
+
+        .guest-remove:hover {
+            opacity: 1;
+            background: color-mix(in srgb, var(--primary) 10%, transparent);
+        }
+
+        .type-toggle {
+            display: flex;
+            gap: 0;
+            border: 1.5px solid var(--bg-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 0.55rem 0.3rem;
+            border: none;
+            background: transparent;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .type-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dish-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .dish-option {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1.5px solid transparent;
+        }
+
+        .dish-option:hover {
+            background: color-mix(in srgb, var(--primary) 6%, transparent);
+        }
+
+        .dish-option.selected {
+            background: color-mix(in srgb, var(--primary) 8%, transparent);
+            border-color: var(--primary-light);
+        }
+
+        .dish-radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--bg-dark);
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .dish-option.selected .dish-radio {
+            border-color: var(--primary);
+        }
+
+        .dish-option.selected .dish-radio::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .dish-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .dish-section-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 0.8rem 0 0.3rem;
+        }
+
+        .add-guest-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            width: 100%;
+            padding: 0.85rem;
+            border: 2px dashed var(--bg-dark);
+            border-radius: 14px;
+            background: transparent;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .add-guest-btn:hover {
+            border-color: var(--primary-light);
+            background: color-mix(in srgb, var(--primary) 4%, transparent);
+        }
+
+        .decline-link {
+            display: block;
+            margin: 1rem auto 0;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .decline-link:hover {
+            opacity: 0.8;
+        }
+
         .form-note {
             margin-top: 1.5rem;
             font-family: 'Cormorant Garamond', serif;
@@ -1519,7 +1709,7 @@
 
 {{#menu_html}}
 <section class="menu-section section">
-    <h2 class="menu-section-title reveal">El Banquete</h2>
+    <h2 class="menu-section-title reveal">{{t_menu_title}}</h2>
     <p class="menu-section-subtitle reveal reveal-delay-1">{{venue}}</p>
 
     <div class="menu-cards">
@@ -1540,66 +1730,40 @@
     <p class="form-section-subtitle reveal reveal-delay-1">{{t_rsvp_subtitle}}</p>
 
     <div class="form-container reveal reveal-delay-2">
-        <form id="rsvp-form">
-            <div class="form-field">
-                <label class="form-label" for="rsvp-name">{{t_rsvp_name_label}}</label>
-                <input type="text" id="rsvp-name" name="name" class="form-input" placeholder="{{t_rsvp_name_placeholder}}" required>
-            </div>
+        <div id="rsvp-form-wrapper">
+            <div id="guests-list"></div>
+
+            <button type="button" class="add-guest-btn" onclick="addGuest()">
+                + {{t_rsvp_add_guest}}
+            </button>
 
             <div class="form-field">
-                <label class="form-label" for="rsvp-email">{{t_rsvp_email_label}}</label>
-                <input type="email" id="rsvp-email" name="email" class="form-input" placeholder="{{t_rsvp_email_placeholder}}">
-            </div>
-
-            {{#has_menu_choices}}
-            <div class="form-field">
-                <label class="form-label" for="rsvp-menu">{{t_rsvp_menu_label}}</label>
-                <select id="rsvp-menu" name="menu_choice" class="form-select">
-                    <option value="">{{t_rsvp_menu_placeholder}}</option>
-                    {{menu_options}}
-                </select>
-            </div>
-            {{/has_menu_choices}}
-
-            <div class="form-field">
-                <label class="form-label" for="rsvp-allergies">{{t_rsvp_allergies_label}}</label>
-                <input type="text" id="rsvp-allergies" name="allergies" class="form-input" placeholder="{{t_rsvp_allergies_placeholder}}">
-            </div>
-
-            <div class="form-checkbox-row">
-                <input type="checkbox" id="rsvp-plus-one" name="plus_one" onchange="togglePlusOne(this)">
-                <label for="rsvp-plus-one">{{t_rsvp_plus_one}}</label>
-            </div>
-
-            <div class="plus-one-fields" id="plus-one-fields">
-                <div class="form-field">
-                    <label class="form-label" for="rsvp-plus-one-name">{{t_rsvp_plus_one_name}}</label>
-                    <input type="text" id="rsvp-plus-one-name" name="plus_one_name" class="form-input" placeholder="{{t_rsvp_plus_one_placeholder}}">
-                </div>
+                <label class="form-label">{{t_rsvp_email_label}}</label>
+                <input type="email" id="rsvp-email" class="form-input" placeholder="{{t_rsvp_email_placeholder}}">
             </div>
 
             <div class="form-field">
-                <label class="form-label" for="rsvp-message">{{t_rsvp_message_label}}</label>
-                <textarea id="rsvp-message" name="message" class="form-textarea" placeholder="{{t_rsvp_allergies_placeholder}}"></textarea>
+                <label class="form-label">{{t_rsvp_message_label}}</label>
+                <textarea id="rsvp-message" class="form-textarea" placeholder="{{t_rsvp_message_placeholder}}"></textarea>
             </div>
 
-            <button type="submit" class="submit-btn" id="submit-btn">
+            <button type="button" class="submit-btn" id="submit-btn" onclick="submitRsvp()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/>
                 </svg>
                 <span>{{t_rsvp_submit}}</span>
             </button>
 
+            <button type="button" class="decline-link" onclick="declineRsvp()">{{t_rsvp_decline}}</button>
+
             <div class="rsvp-error" id="rsvp-error"></div>
-        </form>
+        </div>
 
         <div class="rsvp-success" id="rsvp-success">
             <div class="rsvp-success-icon">💒</div>
             <p class="rsvp-success-title">{{t_rsvp_success_title}}</p>
             <p class="rsvp-success-text">{{t_rsvp_success_text}}</p>
         </div>
-
-        <p class="form-note">{{t_rsvp_note}}</p>
     </div>
 </section>
 
@@ -1708,53 +1872,205 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    function togglePlusOne(checkbox) {
-        var fields = document.getElementById('plus-one-fields');
-        if (checkbox.checked) {
-            fields.classList.add('visible');
-        } else {
-            fields.classList.remove('visible');
+    var DISH_CONFIG = {{dish_data}};
+    var guestCount = 0;
+
+    function buildDishOptions(dishes) {
+        return dishes.map(function(dish) {
+            return '<div class="dish-option" onclick="selectDish(this, \'' + dish.replace(/'/g, "\\'") + '\')">' +
+                '<div class="dish-radio"></div>' +
+                '<span class="dish-name">' + dish + '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    function buildMenuToggle() {
+        if (!DISH_CONFIG.hasMultipleMenus) return '';
+        return '<div class="form-field">' +
+            '<label class="form-label">{{t_rsvp_menu_type}}</label>' +
+            '<div class="type-toggle">' +
+            DISH_CONFIG.menus.map(function(m, i) {
+                return '<button type="button" class="type-btn' + (i === 0 ? ' active' : '') + '" onclick="selectMenu(this,' + i + ')">' + m.name + '</button>';
+            }).join('') +
+            '</div></div>';
+    }
+
+    function buildDishSectionsForMenu(menuIndex) {
+        var menu = DISH_CONFIG.menus[menuIndex];
+        if (!menu || !menu.sections.length) return '';
+        var html = '';
+        for (var i = 0; i < menu.sections.length; i++) {
+            if (menu.sections[i].section) {
+                html += '<p class="dish-section-label">' + menu.sections[i].section + '</p>';
+            }
+            html += '<div class="dish-options">' + buildDishOptions(menu.sections[i].items) + '</div>';
+        }
+        return html;
+    }
+
+    function selectMenu(btn, menuIndex) {
+        var card = btn.closest('.guest-card');
+        card.dataset.menuIndex = menuIndex;
+        var toggleBtns = card.querySelectorAll('.type-btn');
+        toggleBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var container = card.querySelector('.dish-sections-container');
+        if (container) {
+            container.innerHTML = buildDishSectionsForMenu(menuIndex);
         }
     }
 
-    var rsvpForm = document.getElementById('rsvp-form');
-    if (rsvpForm) {
-        rsvpForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+    function createGuestCard(index) {
+        var isFirst = index === 0;
+        var card = document.createElement('div');
+        card.className = 'guest-card';
+        card.dataset.index = index;
+        card.dataset.menuIndex = '0';
 
-            var btn = document.getElementById('submit-btn');
-            var errorEl = document.getElementById('rsvp-error');
-            btn.disabled = true;
-            errorEl.classList.remove('visible');
+        var hasMenus = DISH_CONFIG.menus.length > 0;
+        var menuToggle = buildMenuToggle();
+        var dishHtml = hasMenus ? buildDishSectionsForMenu(0) : '';
 
-            var formData = new FormData(rsvpForm);
-            var data = {};
-            formData.forEach(function(value, key) { data[key] = value; });
+        card.innerHTML =
+            '<div class="guest-card-header">' +
+                '<span class="guest-number">{{t_rsvp_guest}} ' + (index + 1) + '</span>' +
+                (isFirst ? '' : '<button type="button" class="guest-remove" onclick="removeGuest(this)">&times;</button>') +
+            '</div>' +
+            '<div class="form-field">' +
+                '<label class="form-label">{{t_rsvp_name_label}}</label>' +
+                '<input type="text" class="form-input guest-name" placeholder="{{t_rsvp_name_placeholder}}">' +
+            '</div>' +
+            menuToggle +
+            (hasMenus ?
+                '<div class="form-field">' +
+                    '<label class="form-label">{{t_rsvp_menu_label}}</label>' +
+                    '<div class="dish-sections-container">' + dishHtml + '</div>' +
+                '</div>' : '') +
+            '<div class="form-field">' +
+                '<label class="form-label">{{t_rsvp_allergies_label}}</label>' +
+                '<input type="text" class="form-input guest-allergies" placeholder="{{t_rsvp_allergies_placeholder}}">' +
+            '</div>';
 
-            data.plus_one = document.getElementById('rsvp-plus-one').checked;
+        return card;
+    }
 
-            fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(function(res) {
-                if (!res.ok) {
-                    return res.json().then(function(body) { throw new Error(body.error || 'Error al enviar'); });
-                }
-                return res.json();
-            })
-            .then(function() {
-                rsvpForm.style.display = 'none';
-                document.getElementById('rsvp-success').classList.add('visible');
-            })
-            .catch(function(err) {
-                errorEl.textContent = err.message;
-                errorEl.classList.add('visible');
-                btn.disabled = false;
-            });
+    function addGuest() {
+        var list = document.getElementById('guests-list');
+        var card = createGuestCard(guestCount);
+        list.appendChild(card);
+        guestCount++;
+        updateGuestNumbers();
+    }
+
+    function removeGuest(btn) {
+        var card = btn.closest('.guest-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px)';
+        card.style.transition = 'all 0.3s ease';
+        setTimeout(function() {
+            card.remove();
+            updateGuestNumbers();
+        }, 300);
+    }
+
+    function updateGuestNumbers() {
+        var cards = document.querySelectorAll('.guest-card');
+        cards.forEach(function(card, i) {
+            card.querySelector('.guest-number').textContent = '{{t_rsvp_guest}} ' + (i + 1);
         });
     }
+
+    function selectDish(option, dish) {
+        var section = option.closest('.dish-options');
+        var allOptions = section.querySelectorAll('.dish-option');
+        allOptions.forEach(function(opt) { opt.classList.remove('selected'); });
+        option.classList.add('selected');
+    }
+
+    function submitRsvp() {
+        var cards = document.querySelectorAll('.guest-card');
+        var guests = [];
+        var valid = true;
+
+        cards.forEach(function(card) {
+            var name = card.querySelector('.guest-name').value.trim();
+            var allergies = card.querySelector('.guest-allergies') ? card.querySelector('.guest-allergies').value.trim() : '';
+
+            if (!name) {
+                card.querySelector('.guest-name').style.borderColor = 'var(--secondary)';
+                valid = false;
+            } else {
+                card.querySelector('.guest-name').style.borderColor = '';
+            }
+
+            var menuIndex = parseInt(card.dataset.menuIndex || '0');
+            var menuName = DISH_CONFIG.menus[menuIndex] ? DISH_CONFIG.menus[menuIndex].name : '';
+
+            var dishes = [];
+            card.querySelectorAll('.dish-option.selected .dish-name').forEach(function(el) {
+                dishes.push(el.textContent);
+            });
+
+            guests.push({
+                name: name,
+                menu_type: menuName || 'default',
+                menu_choice: dishes.join(', '),
+                allergies: allergies
+            });
+        });
+
+        if (!valid) return;
+
+        var email = document.getElementById('rsvp-email').value.trim();
+        var message = document.getElementById('rsvp-message').value.trim();
+
+        var btn = document.getElementById('submit-btn');
+        var errorEl = document.getElementById('rsvp-error');
+        btn.disabled = true;
+        errorEl.classList.remove('visible');
+
+        fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guests: guests, email: email, message: message, attending: 'yes' })
+        })
+        .then(function(res) {
+            if (!res.ok) {
+                return res.json().then(function(body) { throw new Error(body.error || 'Error'); });
+            }
+            return res.json();
+        })
+        .then(function() {
+            document.getElementById('rsvp-form-wrapper').style.display = 'none';
+            document.getElementById('rsvp-success').classList.add('visible');
+        })
+        .catch(function(err) {
+            errorEl.textContent = err.message;
+            errorEl.classList.add('visible');
+            btn.disabled = false;
+        });
+    }
+
+    function declineRsvp() {
+        var btn = document.getElementById('submit-btn');
+        var errorEl = document.getElementById('rsvp-error');
+        btn.disabled = true;
+
+        fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guests: [{ name: 'Declinado' }], attending: 'no' })
+        })
+        .then(function() {
+            document.getElementById('rsvp-form-wrapper').style.display = 'none';
+            document.getElementById('rsvp-success').classList.add('visible');
+            document.querySelector('.rsvp-success-title').textContent = '{{t_rsvp_decline_title}}';
+            document.querySelector('.rsvp-success-text').textContent = '{{t_rsvp_decline_text}}';
+        })
+        .catch(function() { btn.disabled = false; });
+    }
+
+    addGuest();
 
     var albumPages = document.querySelectorAll('.album-page');
     if (albumPages.length > 0) {
