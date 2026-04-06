@@ -17,7 +17,7 @@
         <ul>
           <li><strong>Denominacion social:</strong> BARTINSOFT SL</li>
           <li><strong>CIF:</strong> B56799588</li>
-          <li><strong>Domicilio social:</strong> Calle Hilados 20, esc dcha bajo A, Torrejon de Ardoz, Madrid</li>
+          <li><strong>Domicilio social:</strong> Calle Hilados 20, Torrejon de Ardoz, Madrid</li>
           <li><strong>Registro Mercantil de Madrid:</strong> Tomo 46082, Folio 130, Hoja M-809669</li>
           <li><strong>Email de contacto:</strong> support@wedding30s.com</li>
           <li><strong>Sitio web:</strong> https://wedding30s.com</li>
@@ -49,7 +49,7 @@
         <ul>
           <li><strong>Responsable:</strong> BARTINSOFT SL</li>
           <li><strong>CIF:</strong> B56799588</li>
-          <li><strong>Domicilio:</strong> Calle Hilados 20, esc dcha bajo A, Torrejon de Ardoz, Madrid</li>
+          <li><strong>Domicilio:</strong> Calle Hilados 20, Torrejon de Ardoz, Madrid</li>
           <li><strong>Email:</strong> support@wedding30s.com</li>
         </ul>
 
