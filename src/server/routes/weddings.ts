@@ -516,7 +516,7 @@ router.get('/api/weddings/:slug/calendar', async (req, res) => {
     ].join('\r\n');
 
     res.set('Content-Type', 'text/calendar; charset=utf-8');
-    res.set('Content-Disposition', `attachment; filename="${wedding.slug}.ics"`);
+    res.set('Content-Disposition', `inline; filename="${wedding.slug}.ics"`);
     res.send(ics);
   } catch (err) {
     res.status(500).send('Failed to generate calendar');
