@@ -205,10 +205,11 @@
           <img src="/logo.png" alt="Wedding30s" class="h-16 brightness-[2]" />
           <p class="text-gray-500 text-sm mt-2">&copy; {{ new Date().getFullYear() }} wedding30s.com</p>
         </div>
-        <div class="flex gap-4 text-sm text-gray-500">
+        <div class="flex flex-wrap justify-center md:justify-end gap-x-4 gap-y-1 text-sm text-gray-500">
+          <router-link to="/legal/legal" class="hover:text-gold-400 transition-colors">{{ $t('landing.legalNotice') }}</router-link>
+          <router-link to="/legal/privacy" class="hover:text-gold-400 transition-colors">{{ $t('landing.privacy') }}</router-link>
+          <router-link to="/legal/terms" class="hover:text-gold-400 transition-colors">{{ $t('landing.terms') }}</router-link>
           <router-link to="/login" class="hover:text-gold-400 transition-colors">{{ $t('auth.login') }}</router-link>
-          <span class="text-gray-700">·</span>
-          <router-link to="/create" class="hover:text-gold-400 transition-colors">{{ $t('landing.getStarted') }}</router-link>
         </div>
       </div>
     </footer>

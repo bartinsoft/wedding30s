@@ -53,7 +53,10 @@
     "pricingFeature7": "Enlace compartible y codigo QR incluidos",
     "pricingFeature8": "Vista previa gratuita antes de publicar",
     "createYourWebsite": "Crea tu web de boda",
-    "previewFree": "La vista previa es siempre gratis"
+    "previewFree": "La vista previa es siempre gratis",
+    "legalNotice": "Aviso legal",
+    "privacy": "Privacidad",
+    "terms": "Terminos"
   },
   "create": {
     "stepOf": "Paso {current} de {total}",

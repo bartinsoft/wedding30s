@@ -53,7 +53,10 @@
     "pricingFeature7": "Shareable link and QR code included",
     "pricingFeature8": "Free preview before publishing",
     "createYourWebsite": "Create Your Website",
-    "previewFree": "Preview is always free"
+    "previewFree": "Preview is always free",
+    "legalNotice": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "create": {
     "stepOf": "Step {current} of {total}",

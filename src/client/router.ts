@@ -8,6 +8,7 @@ import RegisterView from './views/RegisterView.vue'
 import ForgotPasswordView from './views/ForgotPasswordView.vue'
 import ResetPasswordView from './views/ResetPasswordView.vue'
 import MyWeddingsView from './views/MyWeddingsView.vue'
+import LegalView from './views/LegalView.vue'
 import WeddingView from './views/WeddingView.vue'
 
 export const routes: RouteRecordRaw[] = [
@@ -20,5 +21,6 @@ export const routes: RouteRecordRaw[] = [
   { path: '/create', component: CreateView },
   { path: '/preview/:id', component: PreviewView, props: true },
   { path: '/dashboard/:id', component: DashboardView, props: true },
+  { path: '/legal/:page', component: LegalView, props: true },
   { path: '/:slug', component: WeddingView, props: true },
 ]
