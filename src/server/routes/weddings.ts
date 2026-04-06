@@ -479,7 +479,7 @@ router.post('/api/weddings/:slug/rsvp', async (req, res) => {
   }
 });
 
-router.get('/api/weddings/:slug/calendar.ics', async (req, res) => {
+router.get('/api/weddings/:slug/calendar', async (req, res) => {
   try {
     const wedding = await queryOne(
       'SELECT partner1_name, partner2_name, date, location, venue, slug FROM weddings WHERE slug = ?',

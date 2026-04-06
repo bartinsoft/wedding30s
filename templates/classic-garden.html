@@ -1788,7 +1788,7 @@
 
     function addToCalendar(e) {
         e.preventDefault();
-        var icsUrl = '/api/weddings/' + WEDDING_SLUG + '/calendar.ics';
+        var icsUrl = '/api/weddings/' + WEDDING_SLUG + '/calendar';
         var ua = navigator.userAgent || '';
         var isAndroid = /android/i.test(ua);
         var isIOS = /iphone|ipad|ipod/i.test(ua);
