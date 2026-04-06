@@ -1707,7 +1707,7 @@
     function updateGuestNumbers() {
         var cards = document.querySelectorAll('.guest-card');
         cards.forEach(function(card, i) {
-            card.querySelector('.guest-number').textContent = '{{t_rsvp_guest}} ' + (i + 1);
+            card.querySelector('.guest-number').textContent = "{{t_rsvp_guest}} " + (i + 1);
         });
     }
 
@@ -1760,8 +1760,8 @@
         .then(function() {
             document.getElementById('rsvp-form-wrapper').style.display = 'none';
             document.getElementById('rsvp-success').classList.add('visible');
-            document.querySelector('.rsvp-success-title').textContent = '{{t_rsvp_decline_title}}';
-            document.querySelector('.rsvp-success-text').textContent = '{{t_rsvp_decline_text}}';
+            document.querySelector('.rsvp-success-title').textContent = "{{t_rsvp_decline_title}}";
+            document.querySelector('.rsvp-success-text').textContent = "{{t_rsvp_decline_text}}";
         })
         .catch(function() { btn.disabled = false; });
     }
