@@ -12,7 +12,7 @@ async function seedDemo() {
     const wedding = await queryOne('SELECT * FROM weddings WHERE slug = ?', [DEMO_SLUG]) as Record<string, any>;
     wedding.status = 'published';
     await execute("UPDATE weddings SET status = 'published' WHERE slug = ?", [DEMO_SLUG]);
-    await generateWeddingHtml({
+    const outPath = await generateWeddingHtml({
       slug: wedding.slug,
       partner1_name: wedding.partner1_name,
       partner2_name: wedding.partner2_name,
@@ -23,12 +23,17 @@ async function seedDemo() {
       colors: typeof wedding.colors === 'string' ? wedding.colors : JSON.stringify(wedding.colors),
       photo_url: wedding.photo_url,
       story: wedding.story,
-      menu: wedding.menu,
-      program: wedding.program,
+      menu: typeof wedding.menu === 'string' ? wedding.menu : JSON.stringify(wedding.menu),
+      program: typeof wedding.program === 'string' ? wedding.program : JSON.stringify(wedding.program),
       photos: wedding.photos ? (typeof wedding.photos === 'string' ? JSON.parse(wedding.photos) : wedding.photos) : null,
       language: wedding.language || 'en',
+      maps_url: wedding.maps_url || null,
     });
-    console.log('Done.');
+    const fs = await import('fs');
+    const { uploadWeddingHtml } = await import('../storage/s3.js');
+    const html = fs.readFileSync(outPath, 'utf-8');
+    await uploadWeddingHtml(DEMO_SLUG, html);
+    console.log('Regenerated and uploaded to S3.');
     process.exit(0);
     return;
   }

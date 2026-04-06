@@ -76,6 +76,9 @@ jobs:
 
             docker build -t wedding30s .
 
+            # Clear cached wedding HTML so fresh versions are fetched from S3
+            rm -rf /data/projects/wedding30s/weddings/*/index.html
+
             docker stop wedding30s || true
             docker rm wedding30s || true
 
