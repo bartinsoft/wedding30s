@@ -55,6 +55,9 @@
           <a href="#templates" class="btn-secondary text-lg px-12 py-4">
             {{ $t('landing.seeTemplates') }}
           </a>
+          <a href="/20260615-emma-james" target="_blank" class="text-sm text-gray-400 hover:text-gold-400 transition-colors underline underline-offset-4 self-center">
+            {{ $t('landing.seeDemo') }}
+          </a>
         </div>
 
         <div class="mt-20 relative">
@@ -64,7 +67,7 @@
               <div class="w-3 h-3 rounded-full bg-red-400/60"></div>
               <div class="w-3 h-3 rounded-full bg-yellow-400/60"></div>
               <div class="w-3 h-3 rounded-full bg-green-400/60"></div>
-              <span class="ml-3 text-xs text-gray-500">wedding30s.com/20260615-emma-james</span>
+              <a href="/20260615-emma-james" target="_blank" class="ml-3 text-xs text-gray-500 hover:text-gold-400 transition-colors">wedding30s.com/20260615-emma-james</a>
             </div>
             <div class="aspect-[16/9] bg-gradient-to-br from-cream-100 via-cream-50 to-sage-50 flex items-center justify-center">
               <div class="text-center p-12">
@@ -172,7 +175,7 @@
           <div class="relative bg-gray-900 rounded-3xl border border-white/10 p-10 md:p-14">
             <p class="font-script text-gold-400 text-3xl mb-2">{{ $t('landing.oneTimePayment') }}</p>
             <div class="flex items-baseline justify-center gap-2 mt-6">
-              <span class="font-serif text-7xl text-white font-light">&euro;29</span>
+              <span class="font-serif text-7xl text-white font-light">&euro;49</span>
             </div>
             <p class="text-gray-400 mt-3">{{ $t('landing.noSubscriptions') }}</p>
 

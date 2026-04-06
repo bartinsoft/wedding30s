@@ -18,6 +18,7 @@ interface WeddingData {
   program: string | null;
   photos?: { url: string; year: string; label?: string }[] | null;
   language?: string;
+  maps_url?: string | null;
 }
 
 interface MenuSection {
@@ -92,7 +93,10 @@ const TEMPLATE_STRINGS: Record<string, Record<string, string>> = {
     gallery_title: 'Nuestra historia',
     gallery_subtitle: 'Pasa las páginas de nuestro álbum',
     footer_text: 'Con todo nuestro amor',
-    powered_by: 'Powered by wedding30s.com',
+    powered_by: 'Created with Wedding30s',
+    page_title: '¡Nos Casamos!',
+    add_to_calendar: 'Añadir al calendario',
+    open_in_maps: 'Abrir en Maps',
     menu_choose: '✦ A elegir entre:',
   },
   en: {
@@ -131,7 +135,10 @@ const TEMPLATE_STRINGS: Record<string, Record<string, string>> = {
     gallery_title: 'Our story',
     gallery_subtitle: 'Turn the pages of our album',
     footer_text: 'With all our love',
-    powered_by: 'Powered by wedding30s.com',
+    powered_by: 'Created with Wedding30s',
+    page_title: 'We\'re Getting Married!',
+    add_to_calendar: 'Add to Calendar',
+    open_in_maps: 'Open in Maps',
     menu_choose: '✦ Choose from:',
   },
 };
@@ -410,6 +417,36 @@ function generateGalleryHtml(photos: { url: string; year: string; label?: string
   }).join('\n            ');
 }
 
+function toEmbedUrl(mapsUrl: string): string {
+  // If it's already an embed URL, use it
+  if (mapsUrl.includes('/embed')) return mapsUrl;
+  // Extract the query/place from various Google Maps URL formats
+  // https://www.google.com/maps/place/... -> embed
+  // https://maps.google.com/?q=... -> embed
+  // https://goo.gl/maps/... -> use as-is with embed
+  const placeMatch = mapsUrl.match(/\/maps\/place\/([^/@?]+)/);
+  const qMatch = mapsUrl.match(/[?&]q=([^&]+)/);
+  const query = placeMatch ? decodeURIComponent(placeMatch[1].replace(/\+/g, ' ')) : qMatch ? decodeURIComponent(qMatch[1]) : null;
+  if (query) {
+    return `https://www.google.com/maps/embed/v1/place?key=&q=${encodeURIComponent(query)}`;
+  }
+  // Fallback: use iframe with the original URL
+  return mapsUrl.replace('/maps/', '/maps/embed/v1/place?q=');
+}
+
+function generateMapsHtml(mapsUrl: string, location: string): string {
+  // Generate an iframe embed for the maps URL
+  // Use a simple embed approach that works without API key
+  const embedSrc = mapsUrl.includes('google.com/maps')
+    ? mapsUrl.replace('/maps/', '/maps/embed?') + '&output=embed'
+    : mapsUrl;
+
+  return `<div class="maps-embed-wrap">
+            <iframe src="${embedSrc}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="maps-embed-overlay" onclick="this.classList.add('active')"></div>
+        </div>`;
+}
+
 function processConditionalSections(html: string, sectionName: string, content: string): string {
   const openTag = `{{#${sectionName}}}`;
   const closeTag = `{{/${sectionName}}}`;
@@ -452,10 +489,20 @@ export async function generateWeddingHtml(wedding: WeddingData): Promise<string>
 
   const hasMenuChoices = menuOptions.length > 0;
 
+  const mapsHtml = wedding.maps_url ? generateMapsHtml(wedding.maps_url, wedding.location) : '';
+
   html = processConditionalSections(html, 'story', wedding.story || '');
   html = processConditionalSections(html, 'gallery_html', galleryHtml);
   html = processConditionalSections(html, 'menu_html', menuHtml);
   html = processConditionalSections(html, 'has_menu_choices', hasMenuChoices ? 'yes' : '');
+  html = processConditionalSections(html, 'maps_html', mapsHtml);
+
+  // OG image: use hero photo URL if available, fallback to default
+  const ogImage = wedding.photo_url
+    ? (wedding.photo_url.startsWith('/media/')
+      ? `https://wedding30s.com${wedding.photo_url}`
+      : wedding.photo_url)
+    : 'https://wedding30s.com/og-image.png';
 
   html = html
     .replace(/\{\{partner1\}\}/g, wedding.partner1_name)
@@ -466,12 +513,15 @@ export async function generateWeddingHtml(wedding: WeddingData): Promise<string>
     .replace(/\{\{location\}\}/g, wedding.location)
     .replace(/\{\{venue\}\}/g, wedding.venue || '')
     .replace(/\{\{photo_url\}\}/g, heroPhotoUrl)
+    .replace(/\{\{og_image\}\}/g, ogImage)
+    .replace(/\{\{lang\}\}/g, lang)
     .replace(/\{\{story\}\}/g, wedding.story || '')
     .replace(/\{\{menu_html\}\}/g, menuHtml)
     .replace(/\{\{menu_options\}\}/g, menuOptions)
     .replace(/\{\{dish_data\}\}/g, dishData)
     .replace(/\{\{gallery_html\}\}/g, galleryHtml)
     .replace(/\{\{program\}\}/g, wedding.program || '')
+    .replace(/\{\{maps_html\}\}/g, mapsHtml)
     .replace(/\{\{slug\}\}/g, wedding.slug)
     .replace(/\{\{color_primary\}\}/g, colors.primary)
     .replace(/\{\{color_secondary\}\}/g, colors.secondary)

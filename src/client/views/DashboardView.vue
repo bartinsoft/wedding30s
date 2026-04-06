@@ -206,15 +206,21 @@ interface Wedding {
   date: string
   slug: string
   location: string
+  email: string
+  menu: string | null
 }
 
 interface Guest {
   id: string
   name: string
   attending: 'yes' | 'no' | 'pending'
+  email: string | null
+  menu_type: string
+  menu_choice: string | null
   menu: string
   allergies: string
   message: string
+  created_at: string
 }
 
 const loading = ref(true)

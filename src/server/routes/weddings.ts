@@ -7,6 +7,7 @@ import { query, queryOne, execute } from '../db/index.js';
 import { generateWeddingHtml } from '../generator.js';
 import { uploadToS3 } from '../storage/s3.js';
 import { optionalAuth } from '../middleware/auth.js';
+import { sendEmail, wrapEmailTemplate } from '../email.js';
 import type { Request } from 'express';
 
 const router = Router();
@@ -32,6 +33,7 @@ export async function regenerateIfPublished(wedding: Record<string, any>) {
       program: wedding.program || null,
       photos,
       language: wedding.language || 'es',
+      maps_url: wedding.maps_url || null,
     });
   } catch (err) {
     console.error('Failed to regenerate wedding HTML:', err);
@@ -129,7 +131,7 @@ router.put('/api/weddings/:id', optionalAuth, async (req, res) => {
     return;
   }
 
-  const fields = ['partner1_name', 'partner2_name', 'date', 'location', 'venue', 'template', 'colors', 'palette', 'story', 'menu', 'program', 'photos', 'gallery_style', 'custom_domain', 'email'];
+  const fields = ['partner1_name', 'partner2_name', 'date', 'location', 'venue', 'template', 'colors', 'palette', 'story', 'menu', 'program', 'photos', 'gallery_style', 'custom_domain', 'email', 'maps_url'];
   const updates: string[] = [];
   const values: unknown[] = [];
 
@@ -347,9 +349,49 @@ router.delete('/api/weddings/:id', optionalAuth, async (req, res) => {
   }
 });
 
+function sendRsvpNotification(wedding: Record<string, any>, guestNames: string[], attending: string, details: { menu?: string; allergies?: string; plusOne?: string; message?: string }) {
+  if (!wedding.email) return;
+
+  const isAttending = attending !== 'no' && attending !== 'declined';
+  const baseUrl = process.env.BASE_URL || 'https://wedding30s.com';
+  const dashboardUrl = `${baseUrl}/dashboard/${wedding.id}`;
+
+  const guestLabel = guestNames.join(', ');
+  const subject = isAttending
+    ? `New RSVP: ${guestLabel} will attend your wedding`
+    : `RSVP: ${guestLabel} can't attend your wedding`;
+
+  let body = `<h2 style="font-size: 1.3rem; color: #2C3E2D; margin-bottom: 1rem;">New RSVP Received</h2>`;
+  body += `<table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">`;
+  body += `<tr><td style="padding: 8px 0; color: #888; width: 120px;">Guest(s)</td><td style="padding: 8px 0;"><strong>${guestLabel}</strong></td></tr>`;
+  body += `<tr><td style="padding: 8px 0; color: #888;">Attending</td><td style="padding: 8px 0;">${isAttending ? 'Yes' : 'No'}</td></tr>`;
+  if (details.menu) {
+    body += `<tr><td style="padding: 8px 0; color: #888;">Menu</td><td style="padding: 8px 0;">${details.menu}</td></tr>`;
+  }
+  if (details.allergies) {
+    body += `<tr><td style="padding: 8px 0; color: #888;">Allergies</td><td style="padding: 8px 0;">${details.allergies}</td></tr>`;
+  }
+  if (details.plusOne) {
+    body += `<tr><td style="padding: 8px 0; color: #888;">Plus one</td><td style="padding: 8px 0;">${details.plusOne}</td></tr>`;
+  }
+  if (details.message) {
+    body += `<tr><td style="padding: 8px 0; color: #888;">Message</td><td style="padding: 8px 0;">${details.message}</td></tr>`;
+  }
+  body += `</table>`;
+  body += `<div style="text-align: center; margin-top: 1.5rem;">`;
+  body += `<a href="${dashboardUrl}" style="display: inline-block; padding: 12px 32px; background: #7A8B5E; color: #fff; text-decoration: none; border-radius: 8px; font-size: 0.95rem;">View Dashboard</a>`;
+  body += `</div>`;
+
+  sendEmail({
+    to: wedding.email,
+    subject,
+    html: wrapEmailTemplate(body),
+  });
+}
+
 router.post('/api/weddings/:slug/rsvp', async (req, res) => {
   try {
-    const wedding = await queryOne('SELECT id FROM weddings WHERE slug = ?', [req.params.slug]) as { id: string } | undefined;
+    const wedding = await queryOne('SELECT id, email, partner1_name, partner2_name FROM weddings WHERE slug = ?', [req.params.slug]) as Record<string, any> | undefined;
     if (!wedding) {
       res.status(404).json({ error: 'Wedding not found' });
       return;
@@ -366,6 +408,9 @@ router.post('/api/weddings/:slug/rsvp', async (req, res) => {
       }
 
       const ids: string[] = [];
+      const names: string[] = [];
+      let firstMenu = '';
+      let firstAllergies = '';
       for (const guest of guestList) {
         if (!guest.name) continue;
         const id = nanoid();
@@ -383,7 +428,16 @@ router.post('/api/weddings/:slug/rsvp', async (req, res) => {
           ]
         );
         ids.push(id);
+        names.push(guest.name);
+        if (!firstMenu && guest.menu_choice) firstMenu = guest.menu_choice;
+        if (!firstAllergies && guest.allergies) firstAllergies = guest.allergies;
       }
+
+      sendRsvpNotification(wedding, names, attending || 'yes', {
+        menu: firstMenu,
+        allergies: firstAllergies,
+        message: message || undefined,
+      });
 
       res.status(201).json({ ids });
     } else {
@@ -411,10 +465,61 @@ router.post('/api/weddings/:slug/rsvp', async (req, res) => {
         ]
       );
 
+      sendRsvpNotification(wedding, [name], attending || 'yes', {
+        menu: menu_choice || undefined,
+        allergies: allergies || undefined,
+        plusOne: plus_one_name || undefined,
+        message: message || undefined,
+      });
+
       res.status(201).json({ id });
     }
   } catch (err) {
     res.status(500).json({ error: 'Failed to submit RSVP' });
+  }
+});
+
+router.get('/api/weddings/:slug/calendar.ics', async (req, res) => {
+  try {
+    const wedding = await queryOne(
+      'SELECT partner1_name, partner2_name, date, location, venue, slug FROM weddings WHERE slug = ?',
+      [req.params.slug]
+    ) as Record<string, string> | undefined;
+
+    if (!wedding) {
+      res.status(404).send('Wedding not found');
+      return;
+    }
+
+    const d = new Date(wedding.date);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const dtStart = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T120000`;
+    const dtEnd = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T230000`;
+    const loc = wedding.venue ? `${wedding.venue}, ${wedding.location}` : wedding.location;
+    const summary = `${wedding.partner1_name} & ${wedding.partner2_name} Wedding`;
+    const url = `https://wedding30s.com/${wedding.slug}`;
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Wedding30s//EN',
+      'BEGIN:VEVENT',
+      `DTSTART:${dtStart}`,
+      `DTEND:${dtEnd}`,
+      `SUMMARY:${summary}`,
+      `LOCATION:${loc}`,
+      `URL:${url}`,
+      `DESCRIPTION:${url}`,
+      `UID:${wedding.slug}@wedding30s.com`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    res.set('Content-Type', 'text/calendar; charset=utf-8');
+    res.set('Content-Disposition', `attachment; filename="${wedding.slug}.ics"`);
+    res.send(ics);
+  } catch (err) {
+    res.status(500).send('Failed to generate calendar');
   }
 });
 

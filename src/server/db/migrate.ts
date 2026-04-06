@@ -13,6 +13,15 @@ async function migrate() {
   });
 
   await connection.query(schema);
+
+  // Add maps_url column if missing (existing databases)
+  try {
+    await connection.query('ALTER TABLE weddings ADD COLUMN maps_url TEXT AFTER decorations');
+    console.log('Added maps_url column');
+  } catch {
+    // Column already exists
+  }
+
   console.log('Migration complete');
   await connection.end();
 }

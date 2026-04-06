@@ -10,7 +10,8 @@
     "build": "vite build && tsc -p tsconfig.server.json",
     "start": "node dist/server/index.js",
     "db:migrate": "tsx src/server/db/migrate.ts",
-    "cleanup:drafts": "tsx src/server/scripts/cleanup-drafts.ts"
+    "cleanup:drafts": "tsx src/server/scripts/cleanup-drafts.ts",
+    "seed:demo": "tsx src/server/scripts/seed-demo.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1017.0",

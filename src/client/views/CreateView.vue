@@ -133,6 +133,20 @@
                   </div>
 
                   <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                      {{ $t('create.mapsUrl') }}
+                      <span class="text-gray-600 font-normal">{{ $t('create.venueNameOptional') }}</span>
+                    </label>
+                    <input
+                      v-model="form.maps_url"
+                      type="url"
+                      :placeholder="$t('create.mapsUrlPlaceholder')"
+                      class="form-input-field"
+                    />
+                    <p class="text-xs text-gray-500 mt-2">{{ $t('create.mapsUrlHelp') }}</p>
+                  </div>
+
+                  <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">{{ $t('create.email') }}</label>
                     <input
                       v-model="form.email"
@@ -759,6 +773,7 @@ const form = ref({
   date: '',
   location: '',
   venue: '',
+  maps_url: '',
   email: '',
   template: 'classic-garden',
   palette: 'sage-cream',
@@ -767,12 +782,12 @@ const form = ref({
   galleryEnabled: false,
   galleryStyle: 'grid' as 'grid' | 'slider' | 'album' | 'masonry',
   galleryFiles: [] as File[],
-  galleryPreviews: [] as { url: string; year: string; label: string }[],
+  galleryPreviews: [] as { url: string; year: string; label: string; _dragId?: number }[],
   story: '',
   storyFocused: false,
   language: 'es',
   menuEnabled: false,
-  menus: [] as { name: string; sections: { name: string; items: { name: string }[]; choose: boolean }[] }[],
+  menus: [] as { name: string; _id?: number; sections: { name: string; _id?: number; items: { name: string; _id?: number }[]; choose: boolean }[] }[],
   program: [
     { time: '', description: '' },
   ],
@@ -1025,6 +1040,7 @@ async function saveWedding() {
       date: form.value.date,
       location: form.value.location,
       venue: form.value.venue,
+      maps_url: form.value.maps_url || undefined,
       email: form.value.email,
       template: form.value.template,
       palette: form.value.palette,
@@ -1184,6 +1200,7 @@ onMounted(async () => {
     form.value.date = data.date || ''
     form.value.location = data.location || ''
     form.value.venue = data.venue || ''
+    form.value.maps_url = data.maps_url || ''
     form.value.email = data.email || ''
     form.value.template = data.template || 'classic-garden'
     form.value.story = data.story || ''
