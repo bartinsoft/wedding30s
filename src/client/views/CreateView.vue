@@ -1,9 +1,16 @@
 <template>
   <div class="min-h-screen bg-gray-950 text-white">
+    <div v-if="!ready" class="flex items-center justify-center min-h-screen">
+      <svg class="w-8 h-8 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+    </div>
+    <div v-else>
     <nav class="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <router-link to="/"><img src="/logo.png" alt="Wedding30s" class="h-20 brightness-[2]" /></router-link>
-        <div class="flex items-center gap-4">
+        <router-link to="/"><img src="/logo.png" alt="Wedding30s" class="h-12 md:h-20 brightness-[2]" /></router-link>
+        <div class="flex items-center gap-2 md:gap-4">
           <button
             @click="toggleLocale"
             class="text-sm text-gray-400 hover:text-gold-400 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-gold-400/30"
@@ -15,8 +22,8 @@
       </div>
     </nav>
 
-    <div class="pt-20 pb-12">
-      <div class="max-w-7xl mx-auto px-6">
+    <div class="pt-16 md:pt-20 pb-8 md:pb-12">
+      <div class="max-w-7xl mx-auto px-4 md:px-6">
         <div class="flex items-center justify-center gap-2 py-8">
           <template v-for="step in 4" :key="step">
             <button
@@ -39,7 +46,7 @@
           </template>
         </div>
 
-        <div class="flex gap-12 mt-8" :class="currentStep === 4 ? '' : 'lg:flex-row flex-col'">
+        <div class="flex gap-6 lg:gap-12 mt-6 md:mt-8" :class="currentStep === 4 ? '' : 'lg:flex-row flex-col'">
           <div :class="currentStep === 4 ? 'w-full' : 'lg:w-[58%] w-full'">
             <transition name="slide" mode="out-in">
               <div v-if="currentStep === 1" key="step1">
@@ -224,7 +231,8 @@
                       rows="4"
                       :placeholder="$t('create.yourStoryPlaceholder')"
                       class="form-input-field resize-none"
-                      @focus="previewRef?.scrollToSection('story')"
+                      @focus="form.storyFocused = true; nextTick(() => previewRef?.scrollToSection('story'))"
+                      @blur="form.storyFocused = false"
                     ></textarea>
                   </div>
 
@@ -235,7 +243,7 @@
                         <p class="text-xs text-gray-500 mt-1">{{ $t('create.photoGallerySubtitle') }}</p>
                       </div>
                       <button
-                        @click="form.galleryEnabled = !form.galleryEnabled; if (form.galleryEnabled) nextTick(() => previewRef?.scrollToSection('rsvp'))"
+                        @click="form.galleryEnabled = !form.galleryEnabled; if (form.galleryEnabled) nextTick(() => previewRef?.scrollToSection('gallery'))"
                         class="relative w-11 h-6 rounded-full transition-colors duration-300 flex-shrink-0"
                         :class="form.galleryEnabled ? 'bg-gold-400' : 'bg-gray-700'"
                       >
@@ -247,16 +255,47 @@
                     </div>
 
                     <div v-if="form.galleryEnabled" class="space-y-4 pl-0.5">
+                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button
+                          v-for="style in galleryStyles"
+                          :key="style.value"
+                          @click="form.galleryStyle = style.value"
+                          class="py-2 px-1 rounded-lg border text-center transition-all text-xs"
+                          :class="form.galleryStyle === style.value
+                            ? 'border-gold-400 bg-gold-400/10 text-gold-400'
+                            : 'border-white/10 text-gray-400 hover:border-white/20'"
+                        >
+                          <span class="block text-base mb-0.5">{{ style.icon }}</span>
+                          {{ style.label }}
+                        </button>
+                      </div>
+
                       <p class="text-xs text-gray-500 italic flex items-center gap-1.5">
                         <svg class="w-3.5 h-3.5 flex-shrink-0 text-gold-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {{ $t('create.photoGalleryDraftNotice') }}
                       </p>
-                      <div v-if="form.galleryPreviews.length > 0" class="space-y-3">
-                        <div v-for="(photo, idx) in form.galleryPreviews" :key="'gal-' + idx"
-                             class="flex gap-3 items-start bg-gray-900/50 rounded-xl p-3 border border-white/5 group">
-                          <img :src="photo.url" class="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
+                      <draggable
+                        v-if="form.galleryPreviews.length > 0"
+                        v-model="form.galleryPreviews"
+                        item-key="_dragId"
+                        handle=".gallery-grip"
+                        :animation="200"
+                        class="space-y-3"
+                      >
+                        <template #item="{ element: photo, index: idx }">
+                        <div class="flex gap-3 items-start bg-gray-900/50 rounded-xl p-3 border border-white/5 group">
+                          <div class="flex flex-col items-center gap-2 flex-shrink-0">
+                            <div class="gallery-grip cursor-grab active:cursor-grabbing text-gray-700 hover:text-gray-400 transition-colors">
+                              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                                <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                                <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+                              </svg>
+                            </div>
+                            <img :src="photo.url" class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover" />
+                          </div>
                           <div class="flex-1 space-y-2">
                             <input
                               v-model="photo.label"
@@ -282,7 +321,8 @@
                             </svg>
                           </button>
                         </div>
-                      </div>
+                        </template>
+                      </draggable>
 
                       <div
                         v-if="form.galleryPreviews.length < 10"
@@ -308,7 +348,7 @@
                         <p class="text-xs text-gray-500 mt-1">{{ $t('create.menuSubtitle') }}</p>
                       </div>
                       <button
-                        @click="form.menuEnabled = !form.menuEnabled; if (form.menuEnabled) nextTick(() => previewRef?.scrollToSection('program'))"
+                        @click="form.menuEnabled = !form.menuEnabled; if (form.menuEnabled) nextTick(() => previewRef?.scrollToSection('menu'))"
                         class="relative w-11 h-6 rounded-full transition-colors duration-300 flex-shrink-0"
                         :class="form.menuEnabled ? 'bg-gold-400' : 'bg-gray-700'"
                       >
@@ -346,7 +386,7 @@
                         <draggable
                           v-model="menu.sections"
                           handle=".section-grip"
-                          item-key="name"
+                          item-key="_id"
                           :animation="200"
                           ghost-class="opacity-30"
                           class="space-y-3"
@@ -382,7 +422,7 @@
                               <draggable
                                 v-model="section.items"
                                 handle=".item-grip"
-                                item-key="name"
+                                item-key="_id"
                                 :animation="200"
                                 ghost-class="opacity-30"
                                 class="space-y-1.5"
@@ -465,7 +505,7 @@
                   <div>
                     <div class="flex items-center justify-between mb-4">
                       <label class="block text-sm font-medium text-gray-300">{{ $t('create.dayProgram') }}</label>
-                      <button @click="addProgramEntry(); previewRef?.scrollToSection('program')" class="text-sm text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1">
+                      <button @click="addProgramEntry(); nextTick(() => previewRef?.scrollToSection('program'))" class="text-sm text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -473,36 +513,46 @@
                       </button>
                     </div>
                     <div class="space-y-3">
-                      <transition-group name="list">
-                        <div
-                          v-for="(entry, index) in form.program"
-                          :key="'prog-' + index"
-                          class="flex gap-3 items-center group"
-                        >
-                          <div class="relative">
+                      <draggable
+                        v-model="form.program"
+                        item-key="index"
+                        handle=".drag-handle"
+                        animation="200"
+                      >
+                        <template #item="{ element: entry, index }">
+                          <div class="flex gap-3 items-center group mb-3">
+                            <div class="drag-handle cursor-grab active:cursor-grabbing text-gray-700 hover:text-gray-400 transition-colors">
+                              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                                <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                                <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+                              </svg>
+                            </div>
+                            <div class="relative">
+                              <input
+                                v-model="entry.time"
+                                type="time"
+                                class="w-24 sm:w-28 bg-gray-900 border border-white/10 rounded-xl px-2 sm:px-3 py-3 text-white
+                                       focus:outline-none focus:border-gold-400/50 transition-all text-sm"
+                              />
+                            </div>
                             <input
-                              v-model="entry.time"
-                              type="time"
-                              class="w-28 bg-gray-900 border border-white/10 rounded-xl px-3 py-3 text-white
-                                     focus:outline-none focus:border-gold-400/50 transition-all text-sm"
+                              v-model="entry.description"
+                              type="text"
+                              :placeholder="$t('create.programPlaceholder')"
+                              class="flex-1 form-input-field"
                             />
+                            <button
+                              @click="form.program.splice(index, 1)"
+                              class="text-gray-700 hover:text-red-400 transition-colors px-1 opacity-0 group-hover:opacity-100"
+                            >
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
-                          <input
-                            v-model="entry.description"
-                            type="text"
-                            :placeholder="$t('create.programPlaceholder')"
-                            class="flex-1 form-input-field"
-                          />
-                          <button
-                            @click="form.program.splice(index, 1)"
-                            class="text-gray-700 hover:text-red-400 transition-colors px-1 opacity-0 group-hover:opacity-100"
-                          >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      </transition-group>
+                        </template>
+                      </draggable>
                       <div v-if="form.program.length === 0" class="text-center py-8 text-gray-600 text-sm">
                         {{ $t('create.noProgramEntries') }}
                       </div>
@@ -550,32 +600,53 @@
                     </dl>
                   </div>
 
-                  <button
-                    @click="publish"
-                    class="w-full btn-primary text-lg py-4"
-                    :disabled="isPublishing"
-                  >
-                    <span v-if="isPublishing" class="flex items-center justify-center gap-3">
-                      <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                      </svg>
-                      {{ $t('create.publishing') }}
-                    </span>
-                    <span v-else>
-                      {{ $t('create.publishFor') }}
-                      <svg class="ml-2 w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </span>
-                  </button>
+                  <template v-if="isPublished">
+                    <button
+                      @click="saveAndGoToDashboard"
+                      class="w-full btn-primary text-lg py-4"
+                      :disabled="isSavingFinal"
+                    >
+                      <span v-if="isSavingFinal" class="flex items-center justify-center gap-3">
+                        <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        {{ $t('create.saving') }}
+                      </span>
+                      <span v-else>
+                        {{ $t('create.saveChanges') }}
+                      </span>
+                    </button>
+                  </template>
 
-                  <button
-                    @click="sharePreview"
-                    class="w-full btn-secondary py-3"
-                  >
-                    {{ $t('create.sharePreviewLink') }}
-                  </button>
+                  <template v-else>
+                    <button
+                      @click="publish"
+                      class="w-full btn-primary text-lg py-4"
+                      :disabled="isPublishing"
+                    >
+                      <span v-if="isPublishing" class="flex items-center justify-center gap-3">
+                        <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        {{ $t('create.publishing') }}
+                      </span>
+                      <span v-else>
+                        {{ $t('create.publishFor') }}
+                        <svg class="ml-2 w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </span>
+                    </button>
+
+                    <button
+                      @click="sharePreview"
+                      class="w-full btn-secondary py-3"
+                    >
+                      {{ $t('create.sharePreviewLink') }}
+                    </button>
+                  </template>
                 </div>
               </div>
             </transition>
@@ -613,6 +684,18 @@
                 </span>
               </button>
             </div>
+
+            <div class="mt-8 text-center">
+              <button
+                @click="showSuggestionModal = true"
+                class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gold-400 transition-colors"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                {{ $t('create.suggestFeature') }}
+              </button>
+            </div>
           </div>
 
           <div v-if="currentStep < 4" class="hidden lg:block lg:w-[42%]">
@@ -630,6 +713,13 @@
       </div>
     </div>
   </div>
+
+  </div>
+  <SuggestionModal
+    :visible="showSuggestionModal"
+    :wedding-id="weddingId || undefined"
+    @close="showSuggestionModal = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -640,12 +730,18 @@ import { setLocale } from '@/i18n'
 import { TEMPLATES, PALETTES, getDefaultPaletteForTemplate, getPaletteColors } from '@/config/templates'
 import WeddingPreview from '@/components/WeddingPreview.vue'
 import draggable from 'vuedraggable'
+import SuggestionModal from '@/components/SuggestionModal.vue'
 
 const router = useRouter()
 const route = useRoute()
 const { t, locale } = useI18n()
 const currentStep = ref(1)
+const ready = ref(false)
 const isPublishing = ref(false)
+const isSavingFinal = ref(false)
+const weddingStatus = ref('draft')
+const isPublished = computed(() => weddingStatus.value === 'published')
+const showSuggestionModal = ref(false)
 const isSaving = ref(false)
 const weddingId = ref<string | null>(null)
 const secretToken = ref<string | null>(null)
@@ -669,20 +765,27 @@ const form = ref({
   photo: null as File | null,
   photoPreview: '',
   galleryEnabled: false,
+  galleryStyle: 'grid' as 'grid' | 'slider' | 'album' | 'masonry',
   galleryFiles: [] as File[],
   galleryPreviews: [] as { url: string; year: string; label: string }[],
   story: '',
+  storyFocused: false,
   language: 'es',
   menuEnabled: false,
   menus: [] as { name: string; sections: { name: string; items: { name: string }[]; choose: boolean }[] }[],
   program: [
-    { time: '15:00', description: 'Ceremony' },
-    { time: '16:00', description: 'Cocktail Hour' },
-    { time: '18:00', description: 'Dinner & Celebration' },
+    { time: '', description: '' },
   ],
 })
 
 const palettes = PALETTES
+
+const galleryStyles = [
+  { value: 'grid' as const, icon: '⊞', label: 'Grid' },
+  { value: 'slider' as const, icon: '⟷', label: 'Slider' },
+  { value: 'album' as const, icon: '📖', label: 'Album' },
+  { value: 'masonry' as const, icon: '⧉', label: 'Masonry' },
+]
 
 if (route.query.template) {
   const tpl = route.query.template as string
@@ -690,14 +793,18 @@ if (route.query.template) {
   form.value.palette = getDefaultPaletteForTemplate(tpl)
 }
 
+let _uid = 0
+function uid() { return ++_uid }
+
 function addMenu() {
   form.value.menus.push({
     name: form.value.menus.length === 0 ? 'Menú' : '',
+    _id: uid(),
     sections: [
-      { name: '', items: [{ name: '' }], choose: false },
+      { name: '', _id: uid(), items: [{ name: '', _id: uid() }], choose: false },
     ],
   })
-  setTimeout(() => previewRef.value?.scrollToSection('menu'), 300)
+  nextTick(() => previewRef.value?.scrollToSection('menu'))
 }
 
 function removeMenu(idx: number) {
@@ -705,7 +812,7 @@ function removeMenu(idx: number) {
 }
 
 function addMenuSection(menuIdx: number) {
-  form.value.menus[menuIdx].sections.push({ name: '', items: [{ name: '' }], choose: false })
+  form.value.menus[menuIdx].sections.push({ name: '', _id: uid(), items: [{ name: '', _id: uid() }], choose: false })
 }
 
 function removeMenuSection(menuIdx: number, secIdx: number) {
@@ -722,7 +829,7 @@ function moveMenuSection(menuIdx: number, secIdx: number, dir: -1 | 1) {
 }
 
 function addDish(menuIdx: number, secIdx: number) {
-  form.value.menus[menuIdx].sections[secIdx].items.push({ name: '' })
+  form.value.menus[menuIdx].sections[secIdx].items.push({ name: '', _id: uid() })
 }
 
 function removeDish(menuIdx: number, secIdx: number, itemIdx: number) {
@@ -738,13 +845,6 @@ const decorationOptions = [
 
 const selectedPaletteColors = computed(() => getPaletteColors(form.value.palette))
 
-let storyScrolledOnce = false
-watch(() => form.value.story, (val) => {
-  if (!storyScrolledOnce && val && val.length > 5) {
-    storyScrolledOnce = true
-    setTimeout(() => previewRef.value?.scrollToSection('story'), 200)
-  }
-})
 
 let menuScrolledOnce = false
 watch(() => form.value.menus, () => {
@@ -772,12 +872,59 @@ const canProceed = computed(() => {
   return true
 })
 
+const DRAFT_KEY = 'wedding30s_draft'
+
+function saveDraftToLocalStorage() {
+  if (weddingId.value) return
+  try {
+    const draft = JSON.parse(JSON.stringify(form.value))
+    draft._step = currentStep.value
+    delete draft.storyFocused
+    // Don't save blob URLs, they won't work after refresh
+    if (draft.galleryPreviews) {
+      draft.galleryPreviews = draft.galleryPreviews.filter((p: { url: string }) => !p.url.startsWith('blob:'))
+    }
+    if (draft.photoPreview?.startsWith('blob:')) {
+      draft.photoPreview = ''
+    }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
+  } catch { /* ignore */ }
+}
+
+function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY)
+}
+
+function restoreDraft() {
+  try {
+    const saved = localStorage.getItem(DRAFT_KEY)
+    if (!saved) return false
+    const draft = JSON.parse(saved)
+    const step = draft._step
+    delete draft._step
+    Object.assign(form.value, draft)
+    if (step >= 1 && step <= 4) currentStep.value = step
+    return true
+  } catch {
+    clearDraft()
+    return false
+  }
+}
+
 let saveTimeout: ReturnType<typeof setTimeout> | null = null
+let draftTimeout: ReturnType<typeof setTimeout> | null = null
 
 watch(form, () => {
-  if (!weddingId.value) return
-  if (saveTimeout) clearTimeout(saveTimeout)
-  saveTimeout = setTimeout(() => saveWedding(), 2000)
+  // Auto-save to server if editing existing wedding
+  if (weddingId.value) {
+    if (saveTimeout) clearTimeout(saveTimeout)
+    saveTimeout = setTimeout(() => saveWedding(), 2000)
+  }
+  // Always save draft to localStorage for new weddings
+  if (!weddingId.value) {
+    if (draftTimeout) clearTimeout(draftTimeout)
+    draftTimeout = setTimeout(saveDraftToLocalStorage, 500)
+  }
 }, { deep: true })
 
 function triggerFileInput() {
@@ -824,6 +971,7 @@ function handleGalleryUpload(e: Event) {
       url: URL.createObjectURL(file),
       year: '',
       label: '',
+      _dragId: uid(),
     })
   }
 
@@ -841,6 +989,9 @@ function addProgramEntry() {
 
 function goBack() {
   currentStep.value--
+  if (weddingId.value) {
+    router.replace({ path: '/create', query: { id: weddingId.value, token: secretToken.value || undefined, step: String(currentStep.value) } })
+  }
 }
 
 async function nextStep() {
@@ -852,6 +1003,9 @@ async function nextStep() {
     await saveWedding()
   }
   currentStep.value++
+  if (weddingId.value) {
+    router.replace({ path: '/create', query: { id: weddingId.value, token: secretToken.value || undefined, step: String(currentStep.value) } })
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -874,11 +1028,16 @@ async function saveWedding() {
       email: form.value.email,
       template: form.value.template,
       palette: form.value.palette,
+      colors: (() => {
+        const p = getPaletteColors(form.value.palette)
+        return { primary: p.primary, secondary: p.accent, bg: p.bg, text: p.text }
+      })(),
       story: form.value.story,
       language: form.value.language,
       menu: form.value.menuEnabled && form.value.menus.length > 0 ? form.value.menus : undefined,
       program: form.value.program,
       photos: photosMetadata.length > 0 ? photosMetadata : undefined,
+      gallery_style: form.value.galleryStyle,
     }
 
     const method = weddingId.value ? 'PUT' : 'POST'
@@ -895,9 +1054,11 @@ async function saveWedding() {
     const isNew = !weddingId.value
     if (isNew) {
       weddingId.value = data.id
+      clearDraft()
       if (data.secret_token) {
         secretToken.value = data.secret_token
       }
+      router.replace({ path: '/create', query: { id: data.id, token: data.secret_token || undefined, step: String(currentStep.value) } })
     }
 
     if (form.value.photo && isNew) {
@@ -932,10 +1093,13 @@ async function uploadPendingPhotos() {
     })
     const data = await res.json()
     if (data.photos) {
-      form.value.galleryPreviews = data.photos.map((p: { url: string; year: string; label: string }) => ({
+      // Merge server URLs with user-entered metadata (year, label)
+      const existing = form.value.galleryPreviews
+      form.value.galleryPreviews = data.photos.map((p: { url: string; year: string; label: string }, i: number) => ({
         url: p.url,
-        year: p.year || '',
-        label: p.label || '',
+        year: existing[i]?.year || p.year || '',
+        label: existing[i]?.label || p.label || '',
+        _dragId: existing[i]?._dragId || uid(),
       }))
       form.value.galleryFiles = []
     }
@@ -955,6 +1119,7 @@ async function publish() {
     })
     const data = await res.json()
 
+    clearDraft()
     if (data.url && data.url.startsWith('http')) {
       window.location.href = data.url
     } else if (data.slug) {
@@ -967,19 +1132,42 @@ async function publish() {
   }
 }
 
+async function saveAndGoToDashboard() {
+  isSavingFinal.value = true
+  try {
+    await uploadPendingPhotos()
+    await saveWedding()
+    router.push(`/dashboard/${weddingId.value}?token=${secretToken.value}`)
+  } catch {
+    //
+  } finally {
+    isSavingFinal.value = false
+  }
+}
+
 async function sharePreview() {
   await saveWedding()
   if (weddingId.value) {
-    const url = `${window.location.origin}/preview/${weddingId.value}`
-    await navigator.clipboard.writeText(url)
-    alert('Preview link copied to clipboard!')
+    const url = `${window.location.origin}/preview/${weddingId.value}?token=${secretToken.value}`
+    try {
+      await navigator.clipboard.writeText(url)
+      alert('Preview link copied to clipboard!')
+    } catch {
+      prompt('Copy this link:', url)
+    }
   }
 }
 
 onMounted(async () => {
   const id = route.query.id as string
   const token = route.query.token as string
-  if (!id) return
+  if (!id) {
+    restoreDraft()
+    const step = parseInt(route.query.step as string)
+    if (step >= 1 && step <= 4) currentStep.value = step
+    ready.value = true
+    return
+  }
 
   try {
     const tp = token ? `?token=${token}` : ''
@@ -989,6 +1177,7 @@ onMounted(async () => {
 
     weddingId.value = data.id
     secretToken.value = data.secret_token || token || null
+    weddingStatus.value = data.status || 'draft'
 
     form.value.partner1 = data.partner1_name || ''
     form.value.partner2 = data.partner2_name || ''
@@ -1001,7 +1190,9 @@ onMounted(async () => {
     form.value.language = data.language || 'es'
     form.value.photoPreview = data.photo_url || ''
 
-    if (data.colors) {
+    if (data.palette) {
+      form.value.palette = data.palette
+    } else if (data.colors) {
       try {
         const colors = typeof data.colors === 'string' ? JSON.parse(data.colors) : data.colors
         const palMap: Record<string, string> = {
@@ -1023,13 +1214,23 @@ onMounted(async () => {
         const menuData = typeof data.menu === 'string' ? JSON.parse(data.menu) : data.menu
         if (Array.isArray(menuData) && menuData.length > 0) {
           if ('sections' in menuData[0]) {
-            form.value.menus = menuData
+            form.value.menus = menuData.map((m: any) => ({
+              ...m,
+              _id: uid(),
+              sections: (m.sections || []).map((s: any) => ({
+                ...s,
+                _id: uid(),
+                items: (s.items || []).map((i: any) => ({ ...i, _id: uid() })),
+              })),
+            }))
           } else {
             form.value.menus = [{
               name: 'Menú',
+              _id: uid(),
               sections: menuData.map((s: { title?: string; items?: string[]; phases?: { name: string; items: string[]; choose?: boolean }[] }) => ({
                 name: s.title || '',
-                items: (s.phases ? s.phases.flatMap((p: { items: string[] }) => p.items) : s.items || []).map((i: string) => ({ name: i })),
+                _id: uid(),
+                items: (s.phases ? s.phases.flatMap((p: { items: string[] }) => p.items) : s.items || []).map((i: string) => ({ name: i, _id: uid() })),
                 choose: s.phases?.some((p: { choose?: boolean }) => p.choose) || false,
               })),
             }]
@@ -1052,11 +1253,22 @@ onMounted(async () => {
           url: p.url,
           year: p.year || '',
           label: p.label || '',
+          _dragId: uid(),
         }))
+        form.value.galleryEnabled = true
       } catch { /* keep default */ }
     }
+
+    if (data.gallery_style) {
+      form.value.galleryStyle = data.gallery_style
+    }
+
+    const step = parseInt(route.query.step as string)
+    if (step >= 1 && step <= 4) currentStep.value = step
   } catch {
     //
+  } finally {
+    ready.value = true
   }
 })
 </script>

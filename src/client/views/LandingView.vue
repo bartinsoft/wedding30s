@@ -2,14 +2,28 @@
   <div class="min-h-screen bg-gray-950 text-white">
     <nav class="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <img src="/logo.png" alt="Wedding30s" class="h-20 brightness-[2]" />
-        <div class="flex items-center gap-3">
+        <img src="/logo.png" alt="Wedding30s" class="h-12 md:h-20 brightness-[2]" />
+        <div class="flex items-center gap-2 md:gap-3">
           <button
             @click="toggleLocale"
             class="text-sm text-gray-400 hover:text-gold-400 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-gold-400/30"
           >
             {{ $i18n.locale === 'en' ? 'ES' : 'EN' }}
           </button>
+          <router-link
+            v-if="user"
+            to="/my-weddings"
+            class="text-sm text-gray-400 hover:text-gold-400 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-gold-400/30"
+          >
+            {{ $t('auth.myWeddings') }}
+          </router-link>
+          <router-link
+            v-else
+            to="/login"
+            class="text-sm text-gray-400 hover:text-gold-400 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-gold-400/30"
+          >
+            {{ $t('auth.login') }}
+          </router-link>
           <router-link to="/create" class="btn-primary text-sm py-2 px-6">
             {{ $t('landing.getStarted') }}
           </router-link>
@@ -92,7 +106,7 @@
         <h2 class="section-title text-white">{{ $t('landing.chooseStyle') }}</h2>
         <p class="section-subtitle">{{ $t('landing.chooseStyleSubtitle') }}</p>
 
-        <div class="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           <router-link
             v-for="tpl in templates"
             :key="tpl.nameKey"
@@ -131,7 +145,7 @@
         <h2 class="section-title text-white">{{ $t('landing.everythingYouNeed') }}</h2>
         <p class="section-subtitle">{{ $t('landing.everythingYouNeedSubtitle') }}</p>
 
-        <div class="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
           <div
             v-for="feature in features"
             :key="feature.titleKey"
@@ -202,10 +216,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLocale } from '@/i18n'
 import { TEMPLATES, getTemplateThumbnailColors } from '@/config/templates'
+import { useAuth } from '@/composables/useAuth'
+
+const { user, fetchUser } = useAuth()
+onMounted(() => fetchUser())
 
 const { t, locale } = useI18n()
 

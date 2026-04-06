@@ -13,6 +13,20 @@ const router = createRouter({
   },
 })
 
+import { useAuth } from './composables/useAuth'
+
+router.beforeEach(async (to, _from, next) => {
+  if (to.meta.requiresAuth) {
+    const { user, fetchUser } = useAuth()
+    if (!user.value) await fetchUser()
+    if (!user.value) {
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return
+    }
+  }
+  next()
+})
+
 const app = createApp(App)
 app.use(router)
 app.use(i18n)

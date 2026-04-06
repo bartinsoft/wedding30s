@@ -140,19 +140,16 @@
           </svg>
         </div>
 
-        <section ref="storySection" class="preview-announcement" v-if="form.story" :style="announcementBg">
+        <section ref="storySection" class="preview-announcement" v-if="form.story || form.storyFocused" :style="announcementBg">
           <div class="preview-announcement-inner">
-            <p class="preview-announcement-date" :style="{ color: colors.textLight }">
-              {{ displayDate }}
-            </p>
             <h2 class="preview-announcement-headline" :style="{ color: colors.text }">
               {{ $t('weddingPreview.ourStory') }}
             </h2>
-            <div class="preview-announcement-body" :style="{ color: colors.textLight }" v-html="form.story"></div>
+            <div class="preview-announcement-body" :style="{ color: colors.textLight }" v-html="form.story || '&nbsp;'"></div>
           </div>
         </section>
 
-        <section ref="programSection" class="preview-program" v-if="hasProgram">
+        <section ref="programSection" class="preview-program" v-if="hasProgram || form.program.length > 0">
           <div class="preview-divider">
             <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
               <path d="M0 10 H50" :stroke="colors.accent" stroke-width="0.5" opacity="0.3"/>
@@ -180,7 +177,7 @@
           </div>
         </section>
 
-        <section ref="menuSection" class="preview-menu" v-if="hasMenu" :style="announcementBg">
+        <section ref="menuSection" class="preview-menu" v-if="hasMenu || form.menuEnabled" :style="announcementBg">
           <div class="preview-divider">
             <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
               <path d="M0 10 H50" :stroke="colors.accent" stroke-width="0.5" opacity="0.3"/>
@@ -211,6 +208,87 @@
                   class="preview-menu-card-desc"
                   :style="{ color: colors.textLight }"
                 >{{ item.name }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section ref="gallerySection" class="preview-gallery" v-if="form.galleryEnabled">
+          <div class="preview-divider">
+            <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
+              <path d="M0 10 H50" :stroke="colors.accent" stroke-width="0.5" opacity="0.3"/>
+              <rect x="54" y="6" width="8" height="8" :fill="colors.accent" opacity="0.2" transform="rotate(45 58 10)"/>
+              <path d="M66 10 H120" :stroke="colors.accent" stroke-width="0.5" opacity="0.3"/>
+            </svg>
+          </div>
+
+          <h2 class="preview-section-script" :style="{ color: colors.text }">{{ $t('weddingPreview.gallery') }}</h2>
+
+          <div v-if="!galleryPhotos.length" class="preview-gallery-empty" :style="{ color: colors.textLight }">
+            <svg class="preview-gallery-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p style="font-size: 0.6rem; opacity: 0.5;">{{ $t('weddingPreview.galleryEmpty') }}</p>
+          </div>
+
+          <!-- Grid -->
+          <div v-else-if="galleryStyle === 'grid'" class="preview-gallery-grid">
+            <div v-for="(photo, idx) in galleryPhotos" :key="'gg-' + idx" class="preview-gallery-item">
+              <img :src="photo.url" :alt="photo.label || ''" />
+              <p v-if="photo.label" class="preview-gallery-label" :style="{ color: colors.textLight }">{{ photo.label }}</p>
+              <p v-if="photo.year" class="preview-gallery-year" :style="{ color: colors.accent }">{{ photo.year }}</p>
+            </div>
+          </div>
+
+          <!-- Slider -->
+          <div v-else-if="galleryStyle === 'slider'" class="preview-gallery-slider">
+            <div class="preview-gallery-slider-track" :style="{ transform: `translateX(-${gallerySlide * 100}%)` }">
+              <div v-for="(photo, idx) in galleryPhotos" :key="'gs-' + idx" class="preview-gallery-slide">
+                <img :src="photo.url" :alt="photo.label || ''" />
+                <p v-if="photo.label" class="preview-gallery-slide-label" :style="{ color: colors.textLight }">{{ photo.label }}</p>
+                <p v-if="photo.year" class="preview-gallery-slide-year" :style="{ color: colors.accent }">{{ photo.year }}</p>
+              </div>
+            </div>
+            <div v-if="galleryPhotos.length > 1" class="preview-gallery-slider-dots">
+              <span
+                v-for="(_, idx) in galleryPhotos" :key="'dot-' + idx"
+                class="preview-gallery-dot"
+                :style="{ background: idx === gallerySlide ? colors.primary : colors.primary + '30' }"
+                @click="gallerySlide = idx"
+              ></span>
+            </div>
+          </div>
+
+          <!-- Album -->
+          <div v-else-if="galleryStyle === 'album'" class="preview-gallery-album">
+            <div class="preview-gallery-album-page" :style="{ borderColor: colors.accent + '20' }">
+              <img :src="galleryPhotos[gallerySlide]?.url" :alt="galleryPhotos[gallerySlide]?.label || ''" />
+              <div class="preview-gallery-album-caption">
+                <p v-if="galleryPhotos[gallerySlide]?.label" :style="{ color: colors.text }" style="font-size: 0.6rem; font-style: italic;">{{ galleryPhotos[gallerySlide]?.label }}</p>
+                <p v-if="galleryPhotos[gallerySlide]?.year" :style="{ color: colors.accent }" style="font-size: 0.5rem;">{{ galleryPhotos[gallerySlide]?.year }}</p>
+              </div>
+              <div class="preview-gallery-album-corner preview-gallery-album-corner-tl" :style="{ borderColor: colors.accent + '40' }"></div>
+              <div class="preview-gallery-album-corner preview-gallery-album-corner-br" :style="{ borderColor: colors.accent + '40' }"></div>
+            </div>
+            <div v-if="galleryPhotos.length > 1" class="preview-gallery-album-nav">
+              <button @click="gallerySlide = (gallerySlide - 1 + galleryPhotos.length) % galleryPhotos.length" :style="{ color: colors.primary }">&#8249;</button>
+              <span style="font-size: 0.5rem;" :style="{ color: colors.textLight }">{{ gallerySlide + 1 }} / {{ galleryPhotos.length }}</span>
+              <button @click="gallerySlide = (gallerySlide + 1) % galleryPhotos.length" :style="{ color: colors.primary }">&#8250;</button>
+            </div>
+          </div>
+
+          <!-- Masonry -->
+          <div v-else-if="galleryStyle === 'masonry'" class="preview-gallery-masonry">
+            <div class="preview-gallery-masonry-col">
+              <div v-for="(photo, idx) in galleryPhotosEven" :key="'gm0-' + idx" class="preview-gallery-masonry-item">
+                <img :src="photo.url" :alt="photo.label || ''" />
+                <p v-if="photo.label" class="preview-gallery-label" :style="{ color: colors.textLight }">{{ photo.label }}</p>
+              </div>
+            </div>
+            <div class="preview-gallery-masonry-col">
+              <div v-for="(photo, idx) in galleryPhotosOdd" :key="'gm1-' + idx" class="preview-gallery-masonry-item">
+                <img :src="photo.url" :alt="photo.label || ''" />
+                <p v-if="photo.label" class="preview-gallery-label" :style="{ color: colors.textLight }">{{ photo.label }}</p>
               </div>
             </div>
           </div>
@@ -282,6 +360,12 @@ interface MenuData {
   sections: MenuSectionData[]
 }
 
+interface GalleryPhoto {
+  url: string
+  year: string
+  label: string
+}
+
 interface FormData {
   partner1: string
   partner2: string
@@ -295,6 +379,10 @@ interface FormData {
   menus: MenuData[]
   program: ProgramEntry[]
   photoPreview?: string
+  galleryEnabled?: boolean
+  galleryStyle?: 'grid' | 'slider' | 'album' | 'masonry'
+  galleryPreviews?: GalleryPhoto[]
+  storyFocused?: boolean
 }
 
 const props = withDefaults(defineProps<{
@@ -308,12 +396,14 @@ const scrollContainer = ref<HTMLElement | null>(null)
 const storySection = ref<HTMLElement | null>(null)
 const menuSection = ref<HTMLElement | null>(null)
 const programSection = ref<HTMLElement | null>(null)
+const gallerySection = ref<HTMLElement | null>(null)
 const rsvpSection = ref<HTMLElement | null>(null)
 
 const sectionRefs: Record<string, typeof storySection> = {
   story: storySection,
   menu: menuSection,
   program: programSection,
+  gallery: gallerySection,
   rsvp: rsvpSection,
 }
 
@@ -379,6 +469,12 @@ const hasMenu = computed(() => {
   return props.form.menuEnabled && props.form.menus.length > 0 &&
     props.form.menus.some(m => m.sections.some(s => s.items.some(i => i.name)))
 })
+
+const galleryPhotos = computed(() => props.form.galleryPreviews || [])
+const galleryStyle = computed(() => props.form.galleryStyle || 'grid')
+const gallerySlide = ref(0)
+const galleryPhotosEven = computed(() => galleryPhotos.value.filter((_, i) => i % 2 === 0))
+const galleryPhotosOdd = computed(() => galleryPhotos.value.filter((_, i) => i % 2 === 1))
 
 const siteStyles = computed(() => ({
   '--preview-bg': colors.value.bg,
@@ -483,7 +579,8 @@ onUnmounted(() => {
 }
 
 .preview-viewport {
-  height: 600px;
+  height: 60vh;
+  max-height: 600px;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -527,7 +624,7 @@ onUnmounted(() => {
 }
 
 .preview-hero {
-  min-height: 500px;
+  min-height: 350px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -637,9 +734,10 @@ onUnmounted(() => {
 
 .preview-hero-names {
   font-family: 'Great Vibes', cursive;
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 5vw, 3rem);
   line-height: 1.1;
   margin: 0;
+  word-break: break-word;
 }
 
 .preview-ampersand {
@@ -724,8 +822,9 @@ onUnmounted(() => {
 .preview-countdown-grid {
   display: flex;
   justify-content: center;
-  gap: 1.2rem;
+  gap: 0.8rem;
   margin-top: 1.2rem;
+  flex-wrap: wrap;
 }
 
 .preview-countdown-item {
@@ -821,7 +920,7 @@ onUnmounted(() => {
 
 .preview-program-timeline {
   position: relative;
-  max-width: 320px;
+  max-width: min(320px, 100%);
   margin: 0 auto;
   padding-left: 1rem;
 }
@@ -874,7 +973,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 400px;
+  max-width: min(400px, 100%);
   margin: 1rem auto 0;
 }
 
@@ -912,6 +1011,200 @@ onUnmounted(() => {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.8rem;
   line-height: 1.6;
+}
+
+.preview-gallery {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.preview-gallery-empty {
+  padding: 2rem;
+  opacity: 0.5;
+}
+
+.preview-gallery-empty-icon {
+  width: 2rem;
+  height: 2rem;
+  margin: 0 auto 0.5rem;
+}
+
+/* Grid */
+.preview-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  max-width: min(400px, 100%);
+  margin: 1rem auto 0;
+}
+
+.preview-gallery-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.preview-gallery-label {
+  font-size: 0.55rem;
+  margin-top: 0.2rem;
+}
+
+.preview-gallery-year {
+  font-size: 0.5rem;
+  font-weight: 600;
+}
+
+/* Slider */
+.preview-gallery-slider {
+  max-width: min(320px, 100%);
+  margin: 1rem auto 0;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.preview-gallery-slider-track {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+
+.preview-gallery-slide {
+  min-width: 100%;
+}
+
+.preview-gallery-slide img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.preview-gallery-slide-label {
+  font-size: 0.6rem;
+  margin-top: 0.3rem;
+  font-style: italic;
+}
+
+.preview-gallery-slide-year {
+  font-size: 0.5rem;
+  font-weight: 600;
+}
+
+.preview-gallery-slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+}
+
+.preview-gallery-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+/* Album */
+.preview-gallery-album {
+  max-width: 280px;
+  margin: 1rem auto 0;
+}
+
+.preview-gallery-album-page {
+  position: relative;
+  background: white;
+  padding: 0.6rem;
+  border: 1px solid;
+  border-radius: 4px;
+  box-shadow: 2px 3px 12px rgba(0,0,0,0.08), -1px -1px 0 rgba(0,0,0,0.02);
+}
+
+.preview-gallery-album-page img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+
+.preview-gallery-album-caption {
+  padding: 0.4rem 0.2rem 0.1rem;
+  text-align: center;
+}
+
+.preview-gallery-album-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-style: solid;
+  border-width: 0;
+}
+
+.preview-gallery-album-corner-tl {
+  top: 4px;
+  left: 4px;
+  border-top-width: 1.5px;
+  border-left-width: 1.5px;
+}
+
+.preview-gallery-album-corner-br {
+  bottom: 4px;
+  right: 4px;
+  border-bottom-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+.preview-gallery-album-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+
+.preview-gallery-album-nav button {
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: 600;
+}
+
+/* Masonry */
+.preview-gallery-masonry {
+  display: flex;
+  gap: 0.4rem;
+  max-width: min(400px, 100%);
+  margin: 1rem auto 0;
+}
+
+.preview-gallery-masonry-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.preview-gallery-masonry-item img {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.preview-gallery-masonry-col:first-child .preview-gallery-masonry-item:nth-child(odd) img {
+  aspect-ratio: 3/4;
+}
+
+.preview-gallery-masonry-col:first-child .preview-gallery-masonry-item:nth-child(even) img {
+  aspect-ratio: 1;
+}
+
+.preview-gallery-masonry-col:last-child .preview-gallery-masonry-item:nth-child(odd) img {
+  aspect-ratio: 1;
+}
+
+.preview-gallery-masonry-col:last-child .preview-gallery-masonry-item:nth-child(even) img {
+  aspect-ratio: 3/4;
 }
 
 .preview-rsvp {

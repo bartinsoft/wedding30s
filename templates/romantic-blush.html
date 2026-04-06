@@ -32,7 +32,6 @@
 
         html {
             scroll-behavior: smooth;
-            scroll-snap-type: y mandatory;
         }
 
         body {
@@ -64,7 +63,6 @@
         .section {
             position: relative;
             z-index: 1;
-            scroll-snap-align: start;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -73,7 +71,6 @@
 
         .section-auto {
             min-height: auto;
-            scroll-snap-align: none;
         }
 
         .reveal {
@@ -102,7 +99,6 @@
             position: relative;
             overflow: hidden;
             padding: 2rem 1.5rem;
-            scroll-snap-align: start;
         }
 
         .hero::before {
@@ -467,6 +463,7 @@
 
         .album-container {
             position: relative;
+            width: 100%;
             max-width: 420px;
             margin: 0 auto;
             perspective: 1200px;
@@ -475,7 +472,8 @@
         .album-book {
             position: relative;
             width: 100%;
-            aspect-ratio: 3/4;
+            height: 0;
+            padding-bottom: 133.33%; /* 4/3 ratio */
             transform-style: preserve-3d;
         }
 
@@ -506,9 +504,9 @@
         .album-page-inner {
             position: absolute;
             inset: 0;
+            padding: 14px;
             display: flex;
             flex-direction: column;
-            padding: 14px 14px 0;
         }
 
         .album-page-img {
@@ -653,17 +651,18 @@
             display: flex;
             flex-direction: column;
             gap: 2rem;
-            max-width: 680px;
+            max-width: 90%;
+            width: 100%;
             margin: 0 auto;
         }
 
         .menu-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem 1.5rem;
-            box-shadow: 0 4px 24px rgba(212, 160, 160, 0.1), 0 1px 4px rgba(212, 160, 160, 0.06);
-            border: 1px solid rgba(212, 160, 160, 0.18);
-            text-align: left;
+            background: linear-gradient(180deg, white 0%, var(--bg) 100%);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 8px 40px rgba(212, 160, 160, 0.12), 0 2px 8px rgba(212, 160, 160, 0.06);
+            border: 1px solid rgba(212, 160, 160, 0.15);
+            text-align: center;
             position: relative;
             overflow: hidden;
         }
@@ -674,36 +673,66 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-light), var(--accent-light), var(--primary-light));
-            opacity: 0.6;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+            opacity: 0.5;
+        }
+
+        .menu-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+            opacity: 0.3;
         }
 
         .menu-card-header {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.6rem;
-            margin-bottom: 1.5rem;
+            gap: 0.4rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--secondary-light);
         }
 
         .menu-card-icon {
-            font-size: 1.6rem;
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
         }
 
         .menu-card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1.3rem, 3.5vw, 1.6rem);
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
             color: var(--text);
             font-weight: 600;
         }
 
         .menu-phase {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(1rem, 2.5vw, 1.15rem);
-            color: var(--primary-dark);
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: var(--primary);
             font-weight: 600;
-            font-style: italic;
-            margin: 1.2rem 0 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin: 2rem 0 0.8rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .menu-phase::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 1px;
+            background: var(--secondary);
+            opacity: 0.5;
         }
 
         .menu-phase-note {
@@ -718,28 +747,20 @@
         .menu-items {
             list-style: none;
             padding: 0;
+            margin-top: 0.5rem;
         }
 
         .menu-items li {
             font-family: 'Lora', serif;
-            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            font-size: clamp(1.05rem, 2.5vw, 1.2rem);
             color: var(--text-light);
-            padding: 0.35rem 0;
-            padding-left: 1.2rem;
+            padding: 0.5rem 0;
             position: relative;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .menu-items li::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 6px;
-            height: 6px;
-            background: var(--accent-light);
-            transform: translateY(-50%) rotate(45deg);
-            border-radius: 1px;
+            content: none;
         }
 
         .menu-items li small {
@@ -768,13 +789,14 @@
         }
 
         .menu-choose-label {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(0.9rem, 2.2vw, 1rem);
-            color: var(--secondary-dark);
-            font-weight: 600;
-            margin: 1rem 0 0.4rem;
+            font-family: 'Lora', serif;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            color: var(--secondary);
+            font-style: italic;
+            margin: 0.8rem 0 0.3rem;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.4rem;
         }
 
@@ -799,20 +821,24 @@
         }
 
         .form-container {
-            max-width: 480px;
+            max-width: 520px;
             margin: 0 auto;
         }
 
         .guest-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 16px rgba(212, 160, 160, 0.08);
-            border: 1px solid rgba(212, 160, 160, 0.15);
+            background: transparent;
+            border-radius: 0;
+            padding: 1.5rem 0;
+            margin-bottom: 0.5rem;
+            border: none;
+            border-bottom: 1px solid rgba(212, 160, 160, 0.15);
             text-align: left;
             position: relative;
             animation: fadeSlideIn 0.4s ease;
+        }
+
+        .guest-card:last-child {
+            border-bottom: none;
         }
 
         @keyframes fadeSlideIn {
@@ -851,6 +877,144 @@
         .guest-remove:hover {
             opacity: 1;
             background: rgba(212, 160, 160, 0.1);
+        }
+
+        .type-toggle {
+            display: flex;
+            gap: 0;
+            border: 1.5px solid var(--bg-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 0.55rem 0.3rem;
+            border: none;
+            background: transparent;
+            font-family: 'Lora', serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .type-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dish-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .dish-option {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1.5px solid transparent;
+        }
+
+        .dish-option:hover {
+            background: rgba(212, 160, 160, 0.06);
+        }
+
+        .dish-option.selected {
+            background: rgba(212, 160, 160, 0.08);
+            border-color: var(--primary-light);
+        }
+
+        .dish-radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--bg-dark);
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .dish-option.selected .dish-radio {
+            border-color: var(--primary);
+        }
+
+        .dish-option.selected .dish-radio::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .dish-name {
+            font-family: 'Lora', serif;
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .dish-section-label {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 0.8rem 0 0.3rem;
+        }
+
+        .add-guest-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            width: 100%;
+            padding: 0.85rem;
+            border: 2px dashed var(--bg-dark);
+            border-radius: 14px;
+            background: transparent;
+            font-family: 'Lora', serif;
+            font-size: 1rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .add-guest-btn:hover {
+            border-color: var(--primary-light);
+            background: rgba(212, 160, 160, 0.04);
+        }
+
+        .decline-link {
+            display: inline-block;
+            margin-top: 1rem;
+            font-family: 'Lora', serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            opacity: 0.5;
+            text-decoration: none;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+            font-style: italic;
+        }
+
+        .decline-link:hover {
+            opacity: 0.8;
+            border-bottom-color: var(--accent);
         }
 
         .form-field {
@@ -902,34 +1066,6 @@
             opacity: 0.4;
         }
 
-        .form-checkbox-row {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-checkbox-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-        }
-
-        .form-checkbox-row label {
-            font-family: 'Lora', serif;
-            font-size: 1.05rem;
-            color: var(--text-light);
-        }
-
-        .plus-one-fields {
-            display: none;
-            padding-left: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .plus-one-fields.visible {
-            display: block;
-        }
 
         .submit-btn {
             display: flex;
@@ -1115,17 +1251,19 @@
         }
 
         .section-divider {
-            scroll-snap-align: none;
             min-height: auto;
         }
 
         @media (min-width: 768px) {
             .menu-cards {
                 flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                max-width: 90%;
             }
 
             .menu-card {
-                flex: 1;
+                flex: 1 1 320px;
             }
 
             .announcement {
@@ -1150,12 +1288,62 @@
                 min-height: 100vh;
             }
 
+            .menu-cards {
+                max-width: 1100px;
+            }
+
             .announcement {
                 padding: 8rem 2rem;
             }
 
+            .announcement-inner {
+                max-width: 800px;
+            }
+
+            .album-container {
+                max-width: 560px;
+            }
+
+            .form-container {
+                max-width: 640px;
+            }
+
+            .countdown {
+                gap: 3rem;
+            }
+
+            .countdown-item span:first-child {
+                font-size: 3.5rem;
+            }
+
+            .menu-section {
+                padding: 5rem 3rem 4rem;
+            }
+
+            .form-section {
+                padding: 5rem 3rem;
+            }
+
             .floral-corner-tl, .floral-corner-br {
                 opacity: 0.3;
+            }
+        }
+
+        @media (min-width: 1440px) {
+            .announcement-inner {
+                max-width: 900px;
+            }
+
+            .menu-cards {
+                max-width: 1200px;
+            }
+
+            .album-container {
+                max-width: 640px;
+            }
+
+            .form-container {
+                max-width: 720px;
             }
         }
 
@@ -1375,66 +1563,40 @@
     <p class="form-section-subtitle reveal reveal-delay-1">{{t_rsvp_subtitle}}</p>
 
     <div class="form-container reveal reveal-delay-2">
-        <form id="rsvp-form">
-            <div class="form-field">
-                <label class="form-label" for="rsvp-name">{{t_rsvp_name_label}}</label>
-                <input type="text" id="rsvp-name" name="name" class="form-input" placeholder="{{t_rsvp_name_placeholder}}" required>
-            </div>
+        <div id="rsvp-form-wrapper">
+            <div id="guests-list"></div>
+
+            <button type="button" class="add-guest-btn" onclick="addGuest()">
+                + {{t_rsvp_add_guest}}
+            </button>
 
             <div class="form-field">
-                <label class="form-label" for="rsvp-email">{{t_rsvp_email_label}}</label>
-                <input type="email" id="rsvp-email" name="email" class="form-input" placeholder="{{t_rsvp_email_placeholder}}">
-            </div>
-
-            {{#has_menu_choices}}
-            <div class="form-field">
-                <label class="form-label" for="rsvp-menu">{{t_rsvp_menu_label}}</label>
-                <select id="rsvp-menu" name="menu_choice" class="form-select">
-                    <option value="">{{t_rsvp_menu_placeholder}}</option>
-                    {{menu_options}}
-                </select>
-            </div>
-            {{/has_menu_choices}}
-
-            <div class="form-field">
-                <label class="form-label" for="rsvp-allergies">{{t_rsvp_allergies_label}}</label>
-                <input type="text" id="rsvp-allergies" name="allergies" class="form-input" placeholder="{{t_rsvp_allergies_placeholder}}">
-            </div>
-
-            <div class="form-checkbox-row">
-                <input type="checkbox" id="rsvp-plus-one" name="plus_one" onchange="togglePlusOne(this)">
-                <label for="rsvp-plus-one">{{t_rsvp_plus_one}}</label>
-            </div>
-
-            <div class="plus-one-fields" id="plus-one-fields">
-                <div class="form-field">
-                    <label class="form-label" for="rsvp-plus-one-name">{{t_rsvp_plus_one_name}}</label>
-                    <input type="text" id="rsvp-plus-one-name" name="plus_one_name" class="form-input" placeholder="{{t_rsvp_plus_one_placeholder}}">
-                </div>
+                <label class="form-label">{{t_rsvp_email_label}}</label>
+                <input type="email" id="rsvp-email" class="form-input" placeholder="{{t_rsvp_email_placeholder}}">
             </div>
 
             <div class="form-field">
-                <label class="form-label" for="rsvp-message">{{t_rsvp_message_label}}</label>
-                <textarea id="rsvp-message" name="message" class="form-textarea" placeholder="{{t_rsvp_allergies_placeholder}}"></textarea>
+                <label class="form-label">{{t_rsvp_message_label}}</label>
+                <textarea id="rsvp-message" class="form-textarea" placeholder="{{t_rsvp_message_placeholder}}"></textarea>
             </div>
 
-            <button type="submit" class="submit-btn" id="submit-btn">
+            <button type="button" class="submit-btn" id="submit-btn" onclick="submitRsvp()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
                 <span>{{t_rsvp_submit}}</span>
             </button>
 
+            <button type="button" class="decline-link" onclick="declineRsvp()">{{t_rsvp_decline}}</button>
+
             <div class="rsvp-error" id="rsvp-error"></div>
-        </form>
+        </div>
 
         <div class="rsvp-success" id="rsvp-success">
             <div class="rsvp-success-icon">💒</div>
             <p class="rsvp-success-title">{{t_rsvp_success_title}}</p>
             <p class="rsvp-success-text">{{t_rsvp_success_text}}</p>
         </div>
-
-        <p class="form-note">{{t_rsvp_note}}</p>
     </div>
 </section>
 
@@ -1509,53 +1671,207 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    function togglePlusOne(checkbox) {
-        var fields = document.getElementById('plus-one-fields');
-        if (checkbox.checked) {
-            fields.classList.add('visible');
-        } else {
-            fields.classList.remove('visible');
+    var DISH_CONFIG = {{dish_data}};
+    var guestCount = 0;
+
+    function buildDishOptions(dishes) {
+        return dishes.map(function(dish) {
+            return '<div class="dish-option" onclick="selectDish(this, \'' + dish.replace(/'/g, "\\'") + '\')">' +
+                '<div class="dish-radio"></div>' +
+                '<span class="dish-name">' + dish + '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    function buildMenuToggle() {
+        if (!DISH_CONFIG.hasMultipleMenus) return '';
+        return '<div class="form-field">' +
+            '<label class="form-label">{{t_rsvp_menu_type}}</label>' +
+            '<div class="type-toggle">' +
+            DISH_CONFIG.menus.map(function(m, i) {
+                return '<button type="button" class="type-btn' + (i === 0 ? ' active' : '') + '" onclick="selectMenu(this,' + i + ')">' + m.name + '</button>';
+            }).join('') +
+            '</div></div>';
+    }
+
+    function buildDishSectionsForMenu(menuIndex) {
+        var menu = DISH_CONFIG.menus[menuIndex];
+        if (!menu || !menu.sections.length) return '';
+        var html = '';
+        for (var i = 0; i < menu.sections.length; i++) {
+            if (menu.sections[i].section) {
+                html += '<p class="dish-section-label">' + menu.sections[i].section + '</p>';
+            }
+            html += '<div class="dish-options">' + buildDishOptions(menu.sections[i].items) + '</div>';
+        }
+        return html;
+    }
+
+    function selectMenu(btn, menuIndex) {
+        var card = btn.closest('.guest-card');
+        card.dataset.menuIndex = menuIndex;
+
+        var toggleBtns = card.querySelectorAll('.type-btn');
+        toggleBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        var container = card.querySelector('.dish-sections-container');
+        if (container) {
+            container.innerHTML = buildDishSectionsForMenu(menuIndex);
         }
     }
 
-    var rsvpForm = document.getElementById('rsvp-form');
-    if (rsvpForm) {
-        rsvpForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+    function createGuestCard(index) {
+        var isFirst = index === 0;
+        var card = document.createElement('div');
+        card.className = 'guest-card';
+        card.dataset.index = index;
+        card.dataset.menuIndex = '0';
 
-            var btn = document.getElementById('submit-btn');
-            var errorEl = document.getElementById('rsvp-error');
-            btn.disabled = true;
-            errorEl.classList.remove('visible');
+        var hasMenus = DISH_CONFIG.menus.length > 0;
+        var menuToggle = buildMenuToggle();
+        var dishHtml = hasMenus ? buildDishSectionsForMenu(0) : '';
 
-            var formData = new FormData(rsvpForm);
-            var data = {};
-            formData.forEach(function(value, key) { data[key] = value; });
+        card.innerHTML =
+            '<div class="guest-card-header">' +
+                '<span class="guest-number">{{t_rsvp_guest}} ' + (index + 1) + '</span>' +
+                (isFirst ? '' : '<button type="button" class="guest-remove" onclick="removeGuest(this)">&times;</button>') +
+            '</div>' +
+            '<div class="form-field">' +
+                '<label class="form-label">{{t_rsvp_name_label}}</label>' +
+                '<input type="text" class="form-input guest-name" placeholder="{{t_rsvp_name_placeholder}}">' +
+            '</div>' +
+            menuToggle +
+            (hasMenus ?
+                '<div class="form-field">' +
+                    '<label class="form-label">{{t_rsvp_menu_label}}</label>' +
+                    '<div class="dish-sections-container">' + dishHtml + '</div>' +
+                '</div>' : '') +
+            '<div class="form-field">' +
+                '<label class="form-label">{{t_rsvp_allergies_label}}</label>' +
+                '<input type="text" class="form-input guest-allergies" placeholder="{{t_rsvp_allergies_placeholder}}">' +
+            '</div>';
 
-            data.plus_one = document.getElementById('rsvp-plus-one').checked;
+        return card;
+    }
 
-            fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(function(res) {
-                if (!res.ok) {
-                    return res.json().then(function(body) { throw new Error(body.error || 'Error al enviar'); });
-                }
-                return res.json();
-            })
-            .then(function() {
-                rsvpForm.style.display = 'none';
-                document.getElementById('rsvp-success').classList.add('visible');
-            })
-            .catch(function(err) {
-                errorEl.textContent = err.message;
-                errorEl.classList.add('visible');
-                btn.disabled = false;
-            });
+    function addGuest() {
+        var list = document.getElementById('guests-list');
+        var card = createGuestCard(guestCount);
+        list.appendChild(card);
+        guestCount++;
+        updateGuestNumbers();
+    }
+
+    function removeGuest(btn) {
+        var card = btn.closest('.guest-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px)';
+        card.style.transition = 'all 0.3s ease';
+        setTimeout(function() {
+            card.remove();
+            updateGuestNumbers();
+        }, 300);
+    }
+
+    function updateGuestNumbers() {
+        var cards = document.querySelectorAll('.guest-card');
+        cards.forEach(function(card, i) {
+            card.querySelector('.guest-number').textContent = '{{t_rsvp_guest}} ' + (i + 1);
         });
     }
+
+    function selectDish(option, dish) {
+        var section = option.closest('.dish-options');
+        var allOptions = section.querySelectorAll('.dish-option');
+        allOptions.forEach(function(opt) { opt.classList.remove('selected'); });
+        option.classList.add('selected');
+    }
+
+    function submitRsvp() {
+        var cards = document.querySelectorAll('.guest-card');
+        var guests = [];
+        var valid = true;
+
+        cards.forEach(function(card) {
+            var name = card.querySelector('.guest-name').value.trim();
+            var allergies = card.querySelector('.guest-allergies') ? card.querySelector('.guest-allergies').value.trim() : '';
+
+            if (!name) {
+                card.querySelector('.guest-name').style.borderColor = 'var(--accent)';
+                valid = false;
+            } else {
+                card.querySelector('.guest-name').style.borderColor = '';
+            }
+
+            var menuIndex = parseInt(card.dataset.menuIndex || '0');
+            var menuName = DISH_CONFIG.menus[menuIndex] ? DISH_CONFIG.menus[menuIndex].name : '';
+
+            var dishes = [];
+            card.querySelectorAll('.dish-option.selected .dish-name').forEach(function(el) {
+                dishes.push(el.textContent);
+            });
+
+            guests.push({
+                name: name,
+                menu_type: menuName || 'default',
+                menu_choice: dishes.join(', '),
+                allergies: allergies
+            });
+        });
+
+        if (!valid) return;
+
+        var email = document.getElementById('rsvp-email').value.trim();
+        var message = document.getElementById('rsvp-message').value.trim();
+
+        var btn = document.getElementById('submit-btn');
+        var errorEl = document.getElementById('rsvp-error');
+        btn.disabled = true;
+        errorEl.classList.remove('visible');
+
+        fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guests: guests, email: email, message: message, attending: 'yes' })
+        })
+        .then(function(res) {
+            if (!res.ok) {
+                return res.json().then(function(body) { throw new Error(body.error || 'Error'); });
+            }
+            return res.json();
+        })
+        .then(function() {
+            document.getElementById('rsvp-form-wrapper').style.display = 'none';
+            document.getElementById('rsvp-success').classList.add('visible');
+        })
+        .catch(function(err) {
+            errorEl.textContent = err.message;
+            errorEl.classList.add('visible');
+            btn.disabled = false;
+        });
+    }
+
+    function declineRsvp() {
+        var btn = document.getElementById('submit-btn');
+        var errorEl = document.getElementById('rsvp-error');
+        btn.disabled = true;
+
+        fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guests: [{ name: 'Declinado' }], attending: 'no' })
+        })
+        .then(function() {
+            document.getElementById('rsvp-form-wrapper').style.display = 'none';
+            document.getElementById('rsvp-success').classList.add('visible');
+            document.querySelector('.rsvp-success-title').textContent = '{{t_rsvp_decline_title}}';
+            document.querySelector('.rsvp-success-text').textContent = '{{t_rsvp_decline_text}}';
+        })
+        .catch(function() { btn.disabled = false; });
+    }
+
+    addGuest();
 
     var albumPages = document.querySelectorAll('.album-page');
     if (albumPages.length > 0) {

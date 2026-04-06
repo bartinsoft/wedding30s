@@ -1,11 +1,14 @@
 import 'dotenv/config';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import path from 'node:path';
 import fs from 'node:fs';
+import authRouter from './routes/auth.js';
 import weddingsRouter from './routes/weddings.js';
 import webhooksRouter from './routes/webhooks.js';
 import sitemapRouter from './routes/sitemap.js';
-import { getFromS3 } from './storage/s3.js';
+import suggestionsRouter from './routes/suggestions.js';
+import { getFromS3, getWeddingHtml } from './storage/s3.js';
 
 for (const dir of ['data', 'public/uploads/tmp', 'weddings', 'templates']) {
   fs.mkdirSync(path.resolve(dir), { recursive: true });
@@ -14,10 +17,11 @@ for (const dir of ['data', 'public/uploads/tmp', 'weddings', 'templates']) {
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
 
-app.use('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
+app.use('/api/webhooks/polar', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(express.static(path.resolve('public')));
 
@@ -39,13 +43,26 @@ app.get('/media/*', async (req, res) => {
 });
 
 app.use(webhooksRouter);
+app.use(authRouter);
 app.use(sitemapRouter);
+app.use(suggestionsRouter);
 app.use(weddingsRouter);
 
-app.get('/:slug', (req, res, next) => {
-  const htmlPath = path.resolve('weddings', req.params.slug, 'index.html');
-  if (fs.existsSync(htmlPath)) {
-    res.sendFile(htmlPath);
+app.get('/api/wedding-page/:slug', async (req, res) => {
+  const html = await getWeddingHtml(req.params.slug);
+  if (html) {
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+    return;
+  }
+  res.status(404).json({ error: 'Wedding not found' });
+});
+
+app.get('/:slug', async (req, res, next) => {
+  const html = await getWeddingHtml(req.params.slug);
+  if (html) {
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
     return;
   }
   next();

@@ -1,42 +1,40 @@
 import { Router } from 'express';
+import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 import { queryOne, execute } from '../db/index.js';
-import { generateWeddingHtml } from '../generator.js';
+import { regenerateIfPublished } from './weddings.js';
 
 const router = Router();
 
-function tryVerifyWebhook(Stripe: any, body: any, sig: string) {
+function tryVerifyWebhook(body: string, headers: Record<string, string>) {
   const configs = [
-    { key: process.env.STRIPE_SECRET_KEY_TEST, secret: process.env.STRIPE_WEBHOOK_SECRET_TEST, mode: 'test' },
-    { key: process.env.STRIPE_SECRET_KEY, secret: process.env.STRIPE_WEBHOOK_SECRET, mode: 'live' },
-  ].filter(c => c.key && c.secret);
+    { secret: process.env.POLAR_WEBHOOK_SECRET_TEST, mode: 'test' },
+    { secret: process.env.POLAR_WEBHOOK_SECRET, mode: 'live' },
+  ].filter(c => c.secret);
 
   for (const config of configs) {
     try {
-      const stripe = new Stripe(config.key);
-      const event = stripe.webhooks.constructEvent(body, sig, config.secret);
+      const event = validateEvent(body, headers, config.secret!);
       return { event, mode: config.mode };
-    } catch {
-      continue;
+    } catch (err) {
+      if (err instanceof WebhookVerificationError) continue;
+      throw err;
     }
   }
   return null;
 }
 
-router.post('/api/webhooks/stripe', async (req, res) => {
-  const hasAnyKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY_TEST;
-  const hasAnySecret = process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET_TEST;
+router.post('/api/webhooks/polar', async (req, res) => {
+  const hasAnySecret = process.env.POLAR_WEBHOOK_SECRET || process.env.POLAR_WEBHOOK_SECRET_TEST;
 
-  if (!hasAnyKey || !hasAnySecret) {
-    console.warn('Stripe keys not configured, skipping webhook verification');
+  if (!hasAnySecret) {
+    console.warn('Polar webhook secrets not configured, skipping verification');
     res.status(200).json({ received: true, skipped: true });
     return;
   }
 
   try {
-    const Stripe = (await import('stripe')).default;
-    const sig = req.headers['stripe-signature'] as string;
-
-    const result = tryVerifyWebhook(Stripe, req.body, sig);
+    const rawBody = typeof req.body === 'string' ? req.body : req.body.toString('utf8');
+    const result = tryVerifyWebhook(rawBody, req.headers as Record<string, string>);
     if (!result) {
       res.status(400).send('Webhook signature verification failed');
       return;
@@ -44,35 +42,22 @@ router.post('/api/webhooks/stripe', async (req, res) => {
 
     const { event } = result;
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
+    if (event.type === 'order.paid') {
+      const order = event.data;
+      const weddingId = order.metadata?.wedding_id;
 
-      const wedding = await queryOne('SELECT * FROM weddings WHERE stripe_session_id = ?', [(session as any).id]) as Record<string, string> | undefined;
+      if (!weddingId) {
+        console.warn('order.paid without wedding_id in metadata');
+        res.json({ received: true });
+        return;
+      }
+
+      const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [weddingId]) as Record<string, any> | undefined;
 
       if (wedding) {
         await execute("UPDATE weddings SET status = 'published', updated_at = NOW() WHERE id = ?", [wedding.id]);
-
-        try {
-          const photos = wedding.photos ? JSON.parse(wedding.photos as string) : null;
-
-          generateWeddingHtml({
-            slug: wedding.slug,
-            partner1_name: wedding.partner1_name,
-            partner2_name: wedding.partner2_name,
-            date: wedding.date,
-            location: wedding.location,
-            venue: wedding.venue || null,
-            template: wedding.template,
-            colors: wedding.colors,
-            photo_url: wedding.photo_url || null,
-            story: wedding.story || null,
-            menu: wedding.menu || null,
-            program: wedding.program || null,
-            photos,
-          });
-        } catch (err) {
-          console.error('Failed to generate wedding HTML:', err);
-        }
+        wedding.status = 'published';
+        regenerateIfPublished(wedding);
       }
     }
 

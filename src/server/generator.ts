@@ -1,5 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { uploadWeddingHtml, getFromS3 } from './storage/s3.js';
+import type { Readable } from 'node:stream';
 
 interface WeddingData {
   slug: string;
@@ -76,9 +78,14 @@ const TEMPLATE_STRINGS: Record<string, Record<string, string>> = {
     rsvp_message_label: 'Mensaje para los novios',
     rsvp_message_placeholder: 'Opcional',
     rsvp_submit: 'Confirmar asistencia',
+    rsvp_guest: 'Comensal',
+    rsvp_add_guest: 'Añadir otro comensal',
+    rsvp_menu_type: 'Tipo de menú',
+    rsvp_decline: 'No puedo asistir',
+    rsvp_decline_title: 'Recibido',
+    rsvp_decline_text: 'Lamentamos que no puedas asistir. ¡Os deseamos lo mejor!',
     rsvp_success_title: '¡Confirmación recibida!',
     rsvp_success_text: 'Muchas gracias. ¡Nos vemos pronto!',
-    rsvp_note: 'Tu confirmación llegará directamente a los novios',
     story_prefix: 'El próximo',
     story_headline: '¡¡Nos casamos!!',
     story_cta: '¡¡No faltéis!!',
@@ -110,9 +117,14 @@ const TEMPLATE_STRINGS: Record<string, Record<string, string>> = {
     rsvp_message_label: 'Message for the couple',
     rsvp_message_placeholder: 'Optional',
     rsvp_submit: 'Confirm attendance',
+    rsvp_guest: 'Guest',
+    rsvp_add_guest: 'Add another guest',
+    rsvp_menu_type: 'Menu type',
+    rsvp_decline: 'I can\'t attend',
+    rsvp_decline_title: 'Received',
+    rsvp_decline_text: 'We\'re sorry you can\'t make it. Wishing you all the best!',
     rsvp_success_title: 'Confirmation received!',
     rsvp_success_text: 'Thank you so much. See you soon!',
-    rsvp_note: 'Your confirmation will go directly to the couple',
     story_prefix: 'On',
     story_headline: 'We\'re getting married!!',
     story_cta: 'Don\'t miss it!!',
@@ -302,6 +314,82 @@ function generateMenuOptions(menuJson: string): string {
   return options.join('\n                    ');
 }
 
+function generateDishData(menuJson: string): string {
+  let parsed: unknown[];
+  try {
+    parsed = JSON.parse(menuJson);
+  } catch {
+    return '{"menus":[],"hasMultipleMenus":false}';
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) return '{"menus":[],"hasMultipleMenus":false}';
+
+  interface MenuDishData {
+    name: string;
+    sections: { section: string; items: string[] }[];
+  }
+
+  const menus: MenuDishData[] = [];
+
+  if (isNewMenuFormat(parsed)) {
+    for (const menu of parsed as NewMenu[]) {
+      const sections: { section: string; items: string[] }[] = [];
+      for (const section of menu.sections) {
+        if (section.choose) {
+          const items = section.items.filter(i => i.name).map(i => i.name);
+          if (items.length > 0) {
+            sections.push({ section: section.name || '', items });
+          }
+        }
+      }
+      // Include menu even without chooseable sections (user just picks this menu type)
+      menus.push({ name: menu.name, sections });
+    }
+  } else {
+    const sections: { section: string; items: string[] }[] = [];
+    for (const section of parsed as MenuSection[]) {
+      if (section.phases) {
+        for (const phase of section.phases) {
+          if (phase.choose) {
+            const items = phase.items.map(i => i.replace(/<[^>]*>/g, ''));
+            sections.push({ section: phase.name || section.title, items });
+          }
+        }
+      }
+    }
+    if (sections.length > 0) {
+      menus.push({ name: 'Menu', sections });
+    }
+  }
+
+  return JSON.stringify({ menus, hasMultipleMenus: menus.length > 1 });
+}
+
+async function urlToBase64(url: string): Promise<string> {
+  // url is like /media/photos/xxx/gallery-0.webp — strip /media/ to get S3 key
+  const key = url.replace(/^\/media\//, '');
+  try {
+    const result = await getFromS3(key);
+    if (!result) return url;
+    const chunks: Buffer[] = [];
+    for await (const chunk of result.stream as Readable) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    const base64 = Buffer.concat(chunks).toString('base64');
+    const mime = result.contentType || 'image/webp';
+    return `data:${mime};base64,${base64}`;
+  } catch {
+    return url; // fallback to original URL
+  }
+}
+
+async function resolvePhotosToBase64(photos: { url: string; year: string; label?: string }[]): Promise<{ url: string; year: string; label?: string }[]> {
+  return Promise.all(photos.map(async (photo) => ({
+    ...photo,
+    url: photo.url.startsWith('/media/') ? await urlToBase64(photo.url) : photo.url,
+  })));
+}
+
 function generateGalleryHtml(photos: { url: string; year: string; label?: string }[]): string {
   if (!photos || photos.length === 0) return '';
 
@@ -313,7 +401,7 @@ function generateGalleryHtml(photos: { url: string; year: string; label?: string
 
     return `<div class="album-page" data-index="${i}">
                 <div class="album-page-inner">
-                    <img src="${photo.url}" alt="Foto ${photo.year}" class="album-page-img" loading="lazy">
+                    <img src="${photo.url}" alt="" class="album-page-img">
                     <div class="album-page-footer">
                         ${footer}
                     </div>
@@ -336,7 +424,7 @@ function processConditionalSections(html: string, sectionName: string, content: 
     .replace(new RegExp(closeTag.replace(/[{}#/]/g, '\\$&'), 'g'), '');
 }
 
-export function generateWeddingHtml(wedding: WeddingData): string {
+export async function generateWeddingHtml(wedding: WeddingData): Promise<string> {
   const templatePath = path.resolve('templates', `${wedding.template}.html`);
 
   if (!fs.existsSync(templatePath)) {
@@ -351,7 +439,17 @@ export function generateWeddingHtml(wedding: WeddingData): string {
 
   const menuHtml = wedding.menu ? generateMenuHtml(wedding.menu) : '';
   const menuOptions = wedding.menu ? generateMenuOptions(wedding.menu) : '';
-  const galleryHtml = wedding.photos ? generateGalleryHtml(wedding.photos) : '';
+  const dishData = wedding.menu ? generateDishData(wedding.menu) : '[]';
+
+  // Convert photos to base64
+  const resolvedPhotos = wedding.photos ? await resolvePhotosToBase64(wedding.photos) : null;
+  const galleryHtml = resolvedPhotos ? generateGalleryHtml(resolvedPhotos) : '';
+
+  // Convert hero photo to base64
+  const heroPhotoUrl = wedding.photo_url?.startsWith('/media/')
+    ? await urlToBase64(wedding.photo_url)
+    : (wedding.photo_url || '');
+
   const hasMenuChoices = menuOptions.length > 0;
 
   html = processConditionalSections(html, 'story', wedding.story || '');
@@ -367,10 +465,11 @@ export function generateWeddingHtml(wedding: WeddingData): string {
     .replace(/\{\{date_iso\}\}/g, formatDateIso(wedding.date))
     .replace(/\{\{location\}\}/g, wedding.location)
     .replace(/\{\{venue\}\}/g, wedding.venue || '')
-    .replace(/\{\{photo_url\}\}/g, wedding.photo_url || '')
+    .replace(/\{\{photo_url\}\}/g, heroPhotoUrl)
     .replace(/\{\{story\}\}/g, wedding.story || '')
     .replace(/\{\{menu_html\}\}/g, menuHtml)
     .replace(/\{\{menu_options\}\}/g, menuOptions)
+    .replace(/\{\{dish_data\}\}/g, dishData)
     .replace(/\{\{gallery_html\}\}/g, galleryHtml)
     .replace(/\{\{program\}\}/g, wedding.program || '')
     .replace(/\{\{slug\}\}/g, wedding.slug)
@@ -388,6 +487,11 @@ export function generateWeddingHtml(wedding: WeddingData): string {
 
   const outPath = path.join(outDir, 'index.html');
   fs.writeFileSync(outPath, html, 'utf-8');
+
+  // Upload to S3 (fire and forget)
+  uploadWeddingHtml(wedding.slug, html).catch(err => {
+    console.error('Failed to upload wedding HTML to S3:', err);
+  });
 
   return outPath;
 }

@@ -6,19 +6,58 @@ import fs from 'node:fs';
 import { query, queryOne, execute } from '../db/index.js';
 import { generateWeddingHtml } from '../generator.js';
 import { uploadToS3 } from '../storage/s3.js';
+import { optionalAuth } from '../middleware/auth.js';
+import type { Request } from 'express';
 
 const router = Router();
 
 const upload = multer({ dest: 'public/uploads/tmp/' });
 
-async function generateSlug(p1: string, p2: string): Promise<string> {
-  const base = `${p1}-${p2}`
+export async function regenerateIfPublished(wedding: Record<string, any>) {
+  if (wedding.status !== 'published') return;
+  try {
+    const photos = wedding.photos ? (typeof wedding.photos === 'string' ? JSON.parse(wedding.photos) : wedding.photos) : null;
+    await generateWeddingHtml({
+      slug: wedding.slug,
+      partner1_name: wedding.partner1_name,
+      partner2_name: wedding.partner2_name,
+      date: wedding.date,
+      location: wedding.location,
+      venue: wedding.venue || null,
+      template: wedding.template,
+      colors: typeof wedding.colors === 'string' ? wedding.colors : JSON.stringify(wedding.colors),
+      photo_url: wedding.photo_url || null,
+      story: wedding.story || null,
+      menu: wedding.menu || null,
+      program: wedding.program || null,
+      photos,
+      language: wedding.language || 'es',
+    });
+  } catch (err) {
+    console.error('Failed to regenerate wedding HTML:', err);
+  }
+}
+
+function authorizeWedding(req: Request, wedding: Record<string, any>): boolean {
+  // JWT auth: user owns the wedding
+  if (req.user && wedding.user_id && req.user.id === wedding.user_id) return true;
+  // Secret token auth
+  const token = req.query.token as string || req.headers['x-wedding-token'] as string;
+  if (wedding.secret_token && token === wedding.secret_token) return true;
+  return false;
+}
+
+async function generateSlug(p1: string, p2: string, date: string): Promise<string> {
+  const d = date.replace(/-/g, '').slice(0, 8); // yyyymmdd
+  const names = `${p1}-${p2}`
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9-]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+
+  const base = `${d}-${names}`;
 
   const existing = await queryOne('SELECT slug FROM weddings WHERE slug = ?', [base]);
   if (!existing) return base;
@@ -28,7 +67,7 @@ async function generateSlug(p1: string, p2: string): Promise<string> {
 
 router.post('/api/weddings', async (req, res) => {
   try {
-    const { partner1_name, partner2_name, date, location, venue, template, colors, email, story, menu, program } = req.body;
+    const { partner1_name, partner2_name, date, location, venue, template, colors, palette, email, story, menu, program } = req.body;
 
     if (!partner1_name || !partner2_name || !date || !location || !email) {
       res.status(400).json({ error: 'Missing required fields' });
@@ -36,17 +75,18 @@ router.post('/api/weddings', async (req, res) => {
     }
 
     const id = nanoid();
-    const slug = await generateSlug(partner1_name, partner2_name);
+    const slug = await generateSlug(partner1_name, partner2_name, date);
     const secret_token = nanoid(32);
 
     await execute(
-      `INSERT INTO weddings (id, slug, partner1_name, partner2_name, date, location, venue, template, colors, email, story, menu, program, secret_token)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO weddings (id, slug, partner1_name, partner2_name, date, location, venue, template, colors, palette, email, story, menu, program, secret_token)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id, slug, partner1_name, partner2_name, date, location,
         venue || null,
         template || 'classic-garden',
         colors ? JSON.stringify(colors) : '{"primary":"#7A8B5E","secondary":"#C4A35A","bg":"#FDFBF7","text":"#2C3E2D"}',
+        palette || 'sage-cream',
         email,
         story || null,
         menu ? JSON.stringify(menu) : null,
@@ -62,15 +102,14 @@ router.post('/api/weddings', async (req, res) => {
   }
 });
 
-router.get('/api/weddings/:id', async (req, res) => {
-  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]);
+router.get('/api/weddings/:id', optionalAuth, async (req, res) => {
+  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, any> | undefined;
   if (!wedding) {
     res.status(404).json({ error: 'Wedding not found' });
     return;
   }
 
-  const token = req.query.token as string || req.headers['x-wedding-token'] as string;
-  if (wedding.secret_token && token !== wedding.secret_token) {
+  if (!authorizeWedding(req, wedding)) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
@@ -78,20 +117,19 @@ router.get('/api/weddings/:id', async (req, res) => {
   res.json(wedding);
 });
 
-router.put('/api/weddings/:id', async (req, res) => {
-  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]);
+router.put('/api/weddings/:id', optionalAuth, async (req, res) => {
+  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, any> | undefined;
   if (!wedding) {
     res.status(404).json({ error: 'Wedding not found' });
     return;
   }
 
-  const token = req.query.token as string || req.headers['x-wedding-token'] as string;
-  if (wedding.secret_token && token !== wedding.secret_token) {
+  if (!authorizeWedding(req, wedding)) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
-  const fields = ['partner1_name', 'partner2_name', 'date', 'location', 'venue', 'template', 'colors', 'story', 'menu', 'program', 'photos', 'custom_domain', 'email'];
+  const fields = ['partner1_name', 'partner2_name', 'date', 'location', 'venue', 'template', 'colors', 'palette', 'story', 'menu', 'program', 'photos', 'gallery_style', 'custom_domain', 'email'];
   const updates: string[] = [];
   const values: unknown[] = [];
 
@@ -113,7 +151,8 @@ router.put('/api/weddings/:id', async (req, res) => {
 
   await execute(`UPDATE weddings SET ${updates.join(', ')} WHERE id = ?`, values);
 
-  const updated = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]);
+  const updated = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, any>;
+  regenerateIfPublished(updated);
   res.json(updated);
 });
 
@@ -196,24 +235,28 @@ function isProduction(): boolean {
   return process.env.NODE_ENV === 'production';
 }
 
-function getStripeKeys(email: string) {
+function getPolarConfig(email: string) {
   const useTest = !isProduction() || email.toLowerCase().endsWith('@bartinsoft.com');
 
   if (useTest) {
     return {
-      secretKey: process.env.STRIPE_SECRET_KEY_TEST || process.env.STRIPE_SECRET_KEY!,
+      accessToken: process.env.POLAR_ACCESS_TOKEN_TEST || process.env.POLAR_ACCESS_TOKEN!,
+      productId: process.env.POLAR_PRODUCT_ID_TEST || process.env.POLAR_PRODUCT_ID!,
+      server: 'sandbox' as const,
       mode: 'test' as const,
     };
   }
   return {
-    secretKey: process.env.STRIPE_SECRET_KEY!,
+    accessToken: process.env.POLAR_ACCESS_TOKEN!,
+    productId: process.env.POLAR_PRODUCT_ID!,
+    server: 'production' as const,
     mode: 'live' as const,
   };
 }
 
 router.post('/api/weddings/:id/publish', async (req, res) => {
   try {
-    const Stripe = (await import('stripe')).default;
+    const { Polar } = await import('@polar-sh/sdk');
 
     const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, string> | undefined;
     if (!wedding) {
@@ -221,36 +264,21 @@ router.post('/api/weddings/:id/publish', async (req, res) => {
       return;
     }
 
-    const { secretKey, mode } = getStripeKeys(wedding.email);
-    const stripe = new Stripe(secretKey);
+    const { accessToken, productId, server, mode } = getPolarConfig(wedding.email);
+    const polar = new Polar({ accessToken, server });
 
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: `Wedding30s — ${wedding.partner1_name} & ${wedding.partner2_name}`,
-            description: 'Tu web de boda personalizada',
-          },
-          unit_amount: 2900,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${baseUrl}/dashboard/${req.params.id}?published=true&token=${wedding.secret_token}`,
-      cancel_url: `${baseUrl}/create?id=${req.params.id}&token=${wedding.secret_token}`,
-      metadata: { stripe_mode: mode, wedding_id: req.params.id },
-      payment_intent_data: {
-        statement_descriptor: 'WEDDING30S',
-      },
+    const checkout = await polar.checkouts.create({
+      products: [productId],
+      successUrl: `${baseUrl}/dashboard/${req.params.id}?published=true&token=${wedding.secret_token}`,
+      customerEmail: wedding.email,
+      metadata: { polar_mode: mode, wedding_id: req.params.id },
     });
 
-    await execute("UPDATE weddings SET stripe_session_id = ?, stripe_mode = ?, updated_at = NOW() WHERE id = ?", [session.id, mode, req.params.id]);
+    await execute("UPDATE weddings SET polar_checkout_id = ?, polar_mode = ?, updated_at = NOW() WHERE id = ?", [checkout.id, mode, req.params.id]);
 
-    res.json({ url: session.url });
+    res.json({ url: checkout.url });
   } catch (err) {
     console.error('Checkout error:', err);
     res.status(500).json({ error: 'Failed to create checkout session' });
@@ -259,31 +287,15 @@ router.post('/api/weddings/:id/publish', async (req, res) => {
 
 router.post('/api/weddings/:id/publish-free', async (req, res) => {
   try {
-    const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, string> | undefined;
+    const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, any> | undefined;
     if (!wedding) {
       res.status(404).json({ error: 'Wedding not found' });
       return;
     }
 
     await execute("UPDATE weddings SET status = 'published', updated_at = NOW() WHERE id = ?", [wedding.id]);
-
-    const photos = wedding.photos ? JSON.parse(wedding.photos as string) : null;
-
-    generateWeddingHtml({
-      slug: wedding.slug,
-      partner1_name: wedding.partner1_name,
-      partner2_name: wedding.partner2_name,
-      date: wedding.date,
-      location: wedding.location,
-      venue: wedding.venue || null,
-      template: wedding.template,
-      colors: wedding.colors,
-      photo_url: wedding.photo_url || null,
-      story: wedding.story || null,
-      menu: wedding.menu || null,
-      program: wedding.program || null,
-      photos,
-    });
+    wedding.status = 'published';
+    regenerateIfPublished(wedding);
 
     res.json({ url: `/${wedding.slug}` });
   } catch (err) {
@@ -292,21 +304,47 @@ router.post('/api/weddings/:id/publish-free', async (req, res) => {
   }
 });
 
-router.get('/api/weddings/:id/guests', async (req, res) => {
-  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, string> | undefined;
+router.get('/api/weddings/:id/guests', optionalAuth, async (req, res) => {
+  const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, any> | undefined;
   if (!wedding) {
     res.status(404).json({ error: 'Wedding not found' });
     return;
   }
 
-  const token = req.query.token as string || req.headers['x-wedding-token'] as string;
-  if (wedding.secret_token && token !== wedding.secret_token) {
+  if (!authorizeWedding(req, wedding)) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
   const guests = await query('SELECT * FROM guests WHERE wedding_id = ? ORDER BY created_at DESC', [req.params.id]);
   res.json(guests);
+});
+
+router.delete('/api/weddings/:id', optionalAuth, async (req, res) => {
+  try {
+    const wedding = await queryOne('SELECT * FROM weddings WHERE id = ?', [req.params.id]) as Record<string, any> | undefined;
+    if (!wedding) {
+      res.status(404).json({ error: 'Wedding not found' });
+      return;
+    }
+
+    if (!authorizeWedding(req, wedding)) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Delete guests first (FK constraint)
+    await execute('DELETE FROM guests WHERE wedding_id = ?', [req.params.id]);
+    // Unlink suggestions
+    await execute('UPDATE suggestions SET wedding_id = NULL WHERE wedding_id = ?', [req.params.id]);
+    // Delete wedding
+    await execute('DELETE FROM weddings WHERE id = ?', [req.params.id]);
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Failed to delete wedding:', err);
+    res.status(500).json({ error: 'Failed to delete wedding' });
+  }
 });
 
 router.post('/api/weddings/:slug/rsvp', async (req, res) => {
@@ -317,31 +355,64 @@ router.post('/api/weddings/:slug/rsvp', async (req, res) => {
       return;
     }
 
-    const { name, email, attending, menu_choice, allergies, plus_one, plus_one_name, message } = req.body;
+    const { guests: guestList, email, message, attending } = req.body;
 
-    if (!name) {
-      res.status(400).json({ error: 'Name is required' });
-      return;
+    // Support both old single-guest format and new multi-guest format
+    if (guestList && Array.isArray(guestList)) {
+      // New multi-guest format
+      if (guestList.length === 0 || !guestList[0].name) {
+        res.status(400).json({ error: 'At least one guest name is required' });
+        return;
+      }
+
+      const ids: string[] = [];
+      for (const guest of guestList) {
+        if (!guest.name) continue;
+        const id = nanoid();
+        await execute(
+          `INSERT INTO guests (id, wedding_id, name, email, attending, menu_type, menu_choice, allergies, message)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            id, wedding.id, guest.name,
+            email || null,
+            attending || 'yes',
+            guest.menu_type || 'adult',
+            guest.menu_choice || null,
+            guest.allergies || null,
+            message || null,
+          ]
+        );
+        ids.push(id);
+      }
+
+      res.status(201).json({ ids });
+    } else {
+      // Legacy single-guest format
+      const { name, menu_choice, allergies, plus_one, plus_one_name } = req.body;
+
+      if (!name) {
+        res.status(400).json({ error: 'Name is required' });
+        return;
+      }
+
+      const id = nanoid();
+      await execute(
+        `INSERT INTO guests (id, wedding_id, name, email, attending, menu_choice, allergies, plus_one, plus_one_name, message)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id, wedding.id, name,
+          email || null,
+          attending || 'yes',
+          menu_choice || null,
+          allergies || null,
+          plus_one ? 1 : 0,
+          plus_one_name || null,
+          message || null,
+        ]
+      );
+
+      res.status(201).json({ id });
     }
-
-    const id = nanoid();
-
-    await execute(
-      `INSERT INTO guests (id, wedding_id, name, email, attending, menu_choice, allergies, plus_one, plus_one_name, message)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        id, wedding.id, name,
-        email || null,
-        attending || 'yes',
-        menu_choice || null,
-        allergies || null,
-        plus_one ? 1 : 0,
-        plus_one_name || null,
-        message || null,
-      ]
-    );
-
-    res.status(201).json({ id });
   } catch (err) {
     res.status(500).json({ error: 'Failed to submit RSVP' });
   }
