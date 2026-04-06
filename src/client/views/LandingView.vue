@@ -64,7 +64,7 @@
               <div class="w-3 h-3 rounded-full bg-red-400/60"></div>
               <div class="w-3 h-3 rounded-full bg-yellow-400/60"></div>
               <div class="w-3 h-3 rounded-full bg-green-400/60"></div>
-              <span class="ml-3 text-xs text-gray-500">emma-james.wedding30s.com</span>
+              <span class="ml-3 text-xs text-gray-500">wedding30s.com/20260615-emma-james</span>
             </div>
             <div class="aspect-[16/9] bg-gradient-to-br from-cream-100 via-cream-50 to-sage-50 flex items-center justify-center">
               <div class="text-center p-12">
@@ -199,16 +199,16 @@
       </div>
     </section>
 
-    <footer class="py-16 px-6 border-t border-white/5">
-      <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer class="py-12 px-6 border-t border-white/5">
+      <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="text-center md:text-left">
-          <img src="/logo.png" alt="Wedding30s" class="h-20 brightness-[2]" />
+          <img src="/logo.png" alt="Wedding30s" class="h-16 brightness-[2]" />
           <p class="text-gray-500 text-sm mt-2">&copy; {{ new Date().getFullYear() }} wedding30s.com</p>
         </div>
-        <div class="flex gap-6">
-          <a href="#" class="text-gray-500 hover:text-gold-400 transition-colors">Instagram</a>
-          <a href="#" class="text-gray-500 hover:text-gold-400 transition-colors">Twitter</a>
-          <a href="#" class="text-gray-500 hover:text-gold-400 transition-colors">Pinterest</a>
+        <div class="flex gap-4 text-sm text-gray-500">
+          <router-link to="/login" class="hover:text-gold-400 transition-colors">{{ $t('auth.login') }}</router-link>
+          <span class="text-gray-700">·</span>
+          <router-link to="/create" class="hover:text-gold-400 transition-colors">{{ $t('landing.getStarted') }}</router-link>
         </div>
       </div>
     </footer>
@@ -245,6 +245,6 @@ const features = [
   { icon: '📸', titleKey: 'featurePhotoTitle', descKey: 'featurePhotoDesc' },
   { icon: '⏱️', titleKey: 'featureCountdownTitle', descKey: 'featureCountdownDesc' },
   { icon: '📋', titleKey: 'featureProgramTitle', descKey: 'featureProgramDesc' },
-  { icon: '🌐', titleKey: 'featureDomainTitle', descKey: 'featureDomainDesc' },
+  { icon: '🍽️', titleKey: 'featureMenuTitle', descKey: 'featureMenuDesc' },
 ]
 </script>
