@@ -1419,6 +1419,25 @@
             }
         }
     </style>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": "{{partner1}} & {{partner2}} — {{t_page_title}}",
+      "startDate": "{{date_iso}}",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "Place",
+        "name": "{{venue}}",
+        "address": "{{location}}"
+      },
+      "description": "{{partner1}} & {{partner2}} · {{date_formatted}} · {{location}}",
+      "url": "https://wedding30s.com/{{slug}}",
+      "image": "{{og_image}}"
+    }
+    </script>
 </head>
 <body>
 
@@ -1650,6 +1669,8 @@
                 <textarea id="rsvp-message" class="form-textarea" placeholder="{{t_rsvp_message_placeholder}}"></textarea>
             </div>
 
+            <div id="turnstile-widget" class="cf-turnstile" data-sitekey="{{turnstile_site_key}}" data-callback="onTurnstileSuccess" data-theme="light" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
+
             <button type="button" class="submit-btn" id="submit-btn" onclick="submitRsvp()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -1688,6 +1709,8 @@
 <script>
     var WEDDING_DATE = '{{date_iso}}';
     var WEDDING_SLUG = '{{slug}}';
+    var turnstileToken = '';
+    function onTurnstileSuccess(token) { turnstileToken = token; }
 
     function addToCalendar(e) {
         e.preventDefault();
@@ -1936,7 +1959,7 @@
         fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ guests: guests, email: email, message: message, attending: 'yes' })
+            body: JSON.stringify({ guests: guests, email: email, message: message, attending: 'yes', turnstileToken: turnstileToken })
         })
         .then(function(res) {
             if (!res.ok) {
@@ -1963,7 +1986,7 @@
         fetch('/api/weddings/' + WEDDING_SLUG + '/rsvp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ guests: [{ name: 'Declinado' }], attending: 'no' })
+            body: JSON.stringify({ guests: [{ name: 'Declinado' }], attending: 'no', turnstileToken: turnstileToken })
         })
         .then(function() {
             document.getElementById('rsvp-form-wrapper').style.display = 'none';

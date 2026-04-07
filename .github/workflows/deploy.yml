@@ -34,6 +34,7 @@ jobs:
             dist/ \
             templates/ \
             public/ \
+            scripts/ \
             package.json \
             package-lock.json \
             Dockerfile \
@@ -92,6 +93,10 @@ jobs:
               wedding30s
 
             docker image prune -f
+
+            # Install daily DB backup cron (3:00 AM)
+            chmod +x $PROJECT_DIR/scripts/backup-db.sh
+            (crontab -l 2>/dev/null | grep -v 'wedding30s.*backup'; echo "0 3 * * * $PROJECT_DIR/scripts/backup-db.sh >> /var/log/wedding30s-backup.log 2>&1") | crontab -
 
             echo "Deploy completado!"
 

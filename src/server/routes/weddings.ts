@@ -8,6 +8,7 @@ import { generateWeddingHtml } from '../generator.js';
 import { uploadToS3 } from '../storage/s3.js';
 import { optionalAuth } from '../middleware/auth.js';
 import { sendEmail, wrapEmailTemplate } from '../email.js';
+import { verifyTurnstile } from '../turnstile.js';
 import type { Request } from 'express';
 
 const router = Router();
@@ -391,6 +392,12 @@ function sendRsvpNotification(wedding: Record<string, any>, guestNames: string[]
 
 router.post('/api/weddings/:slug/rsvp', async (req, res) => {
   try {
+    const turnstileValid = await verifyTurnstile(req.body.turnstileToken || '');
+    if (!turnstileValid) {
+      res.status(403).json({ error: 'Bot verification failed' });
+      return;
+    }
+
     const wedding = await queryOne('SELECT id, email, partner1_name, partner2_name FROM weddings WHERE slug = ?', [req.params.slug]) as Record<string, any> | undefined;
     if (!wedding) {
       res.status(404).json({ error: 'Wedding not found' });

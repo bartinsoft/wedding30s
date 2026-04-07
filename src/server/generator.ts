@@ -527,6 +527,7 @@ export async function generateWeddingHtml(wedding: WeddingData): Promise<string>
     .replace(/\{\{program\}\}/g, wedding.program || '')
     .replace(/\{\{maps_html\}\}/g, mapsHtml)
     .replace(/\{\{slug\}\}/g, wedding.slug)
+    .replace(/\{\{turnstile_site_key\}\}/g, process.env.VITE_TURNSTILE_SITE_KEY || '')
     .replace(/\{\{color_primary\}\}/g, colors.primary)
     .replace(/\{\{color_secondary\}\}/g, colors.secondary)
     .replace(/\{\{color_bg\}\}/g, colors.bg)

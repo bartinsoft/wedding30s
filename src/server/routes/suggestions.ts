@@ -5,22 +5,10 @@ import { execute, queryOne } from '../db/index.js';
 const router = Router();
 
 const GOOGLE_CHAT_WEBHOOK = process.env.GOOGLE_CHAT_WEBHOOK || '';
-const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET || '';
 import { sendEmail, wrapEmailTemplate } from '../email.js';
+import { verifyTurnstile } from '../turnstile.js';
 
 const BCC_EMAIL = process.env.SUGGESTIONS_BCC || '';
-
-async function verifyTurnstile(token: string): Promise<boolean> {
-  if (!TURNSTILE_SECRET || !token) return process.env.NODE_ENV !== 'production';
-
-  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ secret: TURNSTILE_SECRET, response: token }),
-  });
-  const data = await res.json() as { success: boolean };
-  return data.success;
-}
 
 async function notifyGoogleChat(suggestion: { email: string; description: string; links: string }) {
   if (!GOOGLE_CHAT_WEBHOOK) return;
