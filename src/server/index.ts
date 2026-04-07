@@ -8,6 +8,7 @@ import weddingsRouter from './routes/weddings.js';
 import webhooksRouter from './routes/webhooks.js';
 import sitemapRouter from './routes/sitemap.js';
 import suggestionsRouter from './routes/suggestions.js';
+import adminRouter from './routes/admin.js';
 import { getFromS3, getWeddingHtml } from './storage/s3.js';
 
 for (const dir of ['data', 'public/uploads/tmp', 'weddings', 'templates']) {
@@ -42,6 +43,7 @@ app.get('/media/*', async (req, res) => {
   result.stream.pipe(res);
 });
 
+app.use(adminRouter);
 app.use(webhooksRouter);
 app.use(authRouter);
 app.use(sitemapRouter);
