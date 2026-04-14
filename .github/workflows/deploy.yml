@@ -94,6 +94,11 @@ jobs:
               -v /data/projects/wedding30s/public/uploads/tmp:/app/public/uploads/tmp \
               wedding30s
 
+            # Wait for container to be ready, then run schema migration.
+            # Idempotent via CREATE TABLE IF NOT EXISTS — safe on every deploy.
+            sleep 3
+            docker exec wedding30s node dist/server/db/migrate.js || echo "Migration failed (will retry on next deploy)"
+
             docker image prune -f
 
             # Install daily DB backup cron (3:00 AM)

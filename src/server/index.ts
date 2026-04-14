@@ -9,6 +9,7 @@ import webhooksRouter from './routes/webhooks.js';
 import sitemapRouter from './routes/sitemap.js';
 import suggestionsRouter from './routes/suggestions.js';
 import adminRouter from './routes/admin.js';
+import blogRouter from './routes/blog.js';
 import { getFromS3, getWeddingHtml } from './storage/s3.js';
 
 for (const dir of ['data', 'public/uploads/tmp', 'weddings', 'templates']) {
@@ -49,6 +50,7 @@ app.use(authRouter);
 app.use(sitemapRouter);
 app.use(suggestionsRouter);
 app.use(weddingsRouter);
+app.use(blogRouter);
 
 app.get('/api/wedding-page/:slug', async (req, res) => {
   const html = await getWeddingHtml(req.params.slug);

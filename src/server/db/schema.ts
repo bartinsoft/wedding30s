@@ -77,4 +77,20 @@ CREATE TABLE IF NOT EXISTS guests (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (wedding_id) REFERENCES weddings(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id VARCHAR(36) PRIMARY KEY,
+  slug VARCHAR(255) NOT NULL,
+  locale VARCHAR(5) NOT NULL DEFAULT 'en',
+  title VARCHAR(500) NOT NULL,
+  description TEXT NOT NULL,
+  content_html LONGTEXT NOT NULL,
+  hero_image TEXT,
+  translated_slug VARCHAR(255),
+  published_at DATETIME NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_blog_slug_locale (slug, locale),
+  INDEX idx_blog_locale_published (locale, published_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `;

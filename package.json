@@ -10,6 +10,7 @@
     "build": "vite build && tsc -p tsconfig.server.json && tsx scripts/prerender.ts",
     "start": "node dist/server/index.js",
     "db:migrate": "tsx src/server/db/migrate.ts",
+    "seed:blog": "tsx src/server/scripts/seed-blog.ts",
     "cleanup:drafts": "tsx src/server/scripts/cleanup-drafts.ts",
     "seed:demo": "tsx src/server/scripts/seed-demo.ts",
     "backup:db": "tsx src/server/scripts/backup-db.ts"
