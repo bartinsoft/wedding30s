@@ -57,7 +57,8 @@
     "previewFree": "La vista previa es siempre gratis",
     "legalNotice": "Aviso legal",
     "privacy": "Privacidad",
-    "terms": "Terminos"
+    "terms": "Terminos",
+    "blog": "Blog"
   },
   "create": {
     "stepOf": "Paso {current} de {total}",

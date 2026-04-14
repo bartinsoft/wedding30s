@@ -57,7 +57,8 @@
     "previewFree": "Preview is always free",
     "legalNotice": "Legal notice",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "blog": "Blog"
   },
   "create": {
     "stepOf": "Step {current} of {total}",
