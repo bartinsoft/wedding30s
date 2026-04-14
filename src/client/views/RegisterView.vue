@@ -69,6 +69,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { trackEvent } from '@/composables/useAnalytics'
 
 const router = useRouter()
 const route = useRoute()
@@ -85,6 +86,7 @@ async function handleRegister() {
   submitting.value = true
   try {
     await register(email.value, password.value, name.value || undefined)
+    trackEvent('sign_up', { method: 'email' })
     router.push((route.query.redirect as string) || '/my-weddings')
   } catch (e: any) {
     error.value = e.message
@@ -108,6 +110,7 @@ function initGoogle() {
       callback: async (response: any) => {
         try {
           await loginWithGoogle(response.credential)
+          trackEvent('sign_up', { method: 'google' })
           router.push((route.query.redirect as string) || '/my-weddings')
         } catch (e: any) {
           error.value = e.message

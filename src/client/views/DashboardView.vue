@@ -192,6 +192,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '@/composables/useAuth'
+import { trackPurchase } from '@/composables/useAnalytics'
 
 const props = defineProps<{ id: string }>()
 const route = useRoute()
@@ -390,6 +391,9 @@ async function copyUrl() {
 
 onMounted(async () => {
   fetchUser()
+  if (route.query.published === 'true') {
+    trackPurchase(49, 'EUR', String(props.id))
+  }
   try {
     const tp = token.value ? `?token=${token.value}` : ''
     const [weddingRes, guestsRes] = await Promise.all([

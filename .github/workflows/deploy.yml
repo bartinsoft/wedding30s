@@ -22,6 +22,8 @@ jobs:
           cache: npm
 
       - name: Build client and server
+        env:
+          VITE_GA4_ID: G-YRT0QR6TZB
         run: |
           npm ci
           npm run build

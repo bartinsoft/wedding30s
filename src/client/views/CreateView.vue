@@ -745,6 +745,7 @@ import { TEMPLATES, PALETTES, getDefaultPaletteForTemplate, getPaletteColors } f
 import WeddingPreview from '@/components/WeddingPreview.vue'
 import draggable from 'vuedraggable'
 import SuggestionModal from '@/components/SuggestionModal.vue'
+import { trackEvent } from '@/composables/useAnalytics'
 
 const router = useRouter()
 const route = useRoute()
@@ -1128,6 +1129,8 @@ async function publish() {
   isPublishing.value = true
   await saveWedding()
   await uploadPendingPhotos()
+
+  trackEvent('begin_checkout', { value: 49, currency: 'EUR' })
 
   try {
     const res = await fetch(`/api/weddings/${weddingId.value}/publish`, {

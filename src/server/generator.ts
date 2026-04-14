@@ -3,6 +3,17 @@ import path from 'node:path';
 import { uploadWeddingHtml, getFromS3 } from './storage/s3.js';
 import type { Readable } from 'node:stream';
 
+function ga4Snippet(ga4Id: string): string {
+  if (!ga4Id) return '';
+  return `<script async src="https://www.googletagmanager.com/gtag/js?id=${ga4Id}"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${ga4Id}');
+</script>`;
+}
+
 interface WeddingData {
   slug: string;
   partner1_name: string;
@@ -528,6 +539,7 @@ export async function generateWeddingHtml(wedding: WeddingData): Promise<string>
     .replace(/\{\{maps_html\}\}/g, mapsHtml)
     .replace(/\{\{slug\}\}/g, wedding.slug)
     .replace(/\{\{turnstile_site_key\}\}/g, process.env.VITE_TURNSTILE_SITE_KEY || '')
+    .replace(/\{\{ga4_html\}\}/g, ga4Snippet(process.env.GA4_ID || process.env.VITE_GA4_ID || ''))
     .replace(/\{\{color_primary\}\}/g, colors.primary)
     .replace(/\{\{color_secondary\}\}/g, colors.secondary)
     .replace(/\{\{color_bg\}\}/g, colors.bg)
