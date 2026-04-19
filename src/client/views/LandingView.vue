@@ -16,6 +16,12 @@
           >
             {{ $t('landing.blog') }}
           </a>
+          <a
+            :href="$i18n.locale === 'en' ? '/blog/' : '/en/blog/'"
+            class="hidden md:inline-block text-sm text-gray-400 hover:text-gold-400 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-gold-400/30"
+          >
+            Blog {{ $i18n.locale === 'en' ? 'ES' : 'EN' }}
+          </a>
           <router-link
             v-if="user"
             to="/my-weddings"
@@ -215,7 +221,8 @@
           <p class="text-gray-500 text-sm mt-2">&copy; {{ new Date().getFullYear() }} wedding30s.com</p>
         </div>
         <div class="flex flex-wrap justify-center md:justify-end gap-x-4 gap-y-1 text-sm text-gray-500">
-          <a :href="$i18n.locale === 'en' ? '/en/blog/' : '/blog/'" class="hover:text-gold-400 transition-colors">{{ $t('landing.blog') }}</a>
+          <a href="/blog/" class="hover:text-gold-400 transition-colors">Blog ES</a>
+          <a href="/en/blog/" class="hover:text-gold-400 transition-colors">Blog EN</a>
           <router-link to="/legal/legal" class="hover:text-gold-400 transition-colors">{{ $t('landing.legalNotice') }}</router-link>
           <router-link to="/legal/privacy" class="hover:text-gold-400 transition-colors">{{ $t('landing.privacy') }}</router-link>
           <router-link to="/legal/terms" class="hover:text-gold-400 transition-colors">{{ $t('landing.terms') }}</router-link>
