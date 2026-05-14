@@ -238,7 +238,7 @@ function isProduction(): boolean {
   return process.env.NODE_ENV === 'production';
 }
 
-function getPolarConfig(email: string) {
+export function getPolarConfig(email: string) {
   const useTest = !isProduction() || email.toLowerCase().endsWith('@bartinsoft.com');
 
   if (useTest) {

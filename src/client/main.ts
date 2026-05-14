@@ -14,6 +14,7 @@ const router = createRouter({
 })
 
 import { useAuth } from './composables/useAuth'
+import { registerWebMCP } from './webmcp'
 
 router.beforeEach(async (to, _from, next) => {
   if (to.meta.requiresAuth) {
@@ -31,3 +32,5 @@ const app = createApp(App)
 app.use(router)
 app.use(i18n)
 app.mount('#app')
+
+registerWebMCP(router)

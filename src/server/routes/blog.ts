@@ -2,6 +2,30 @@ import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { query, execute } from '../db/index.js';
 import { renderBlogPostHtml, renderBlogIndexHtml, type BlogPost } from '../blog.js';
+import { wantsMarkdown, sendMarkdown, htmlToMarkdown } from '../middleware/markdown-negotiation.js';
+
+const BASE = process.env.BASE_URL || 'https://wedding30s.com';
+
+function blogIndexMarkdown(posts: BlogPost[], locale: 'es' | 'en'): string {
+  const title = locale === 'en' ? 'wedding30s Blog' : 'Blog de wedding30s';
+  const prefix = locale === 'en' ? '/en/blog' : '/blog';
+  const lines = [`# ${title}`, ''];
+  for (const p of posts) {
+    const date = new Date(p.published_at).toISOString().slice(0, 10);
+    lines.push(`## [${p.title}](${BASE}${prefix}/${p.slug})`);
+    lines.push(`*${date}*`);
+    lines.push('');
+    lines.push(p.description);
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
+function blogPostMarkdown(post: BlogPost): string {
+  const date = new Date(post.published_at).toISOString().slice(0, 10);
+  const body = htmlToMarkdown(post.content_html);
+  return `# ${post.title}\n\n*${date}*\n\n> ${post.description}\n\n${body}\n`;
+}
 
 const router = Router();
 
@@ -26,33 +50,41 @@ async function fetchPostsByLocale(locale: 'es' | 'en'): Promise<BlogPost[]> {
   )) as BlogPost[];
 }
 
-router.get('/blog', async (_req, res) => {
+router.get('/blog', async (req, res) => {
   const posts = await fetchPostsByLocale('es');
-  res.set('Content-Type', 'text/html; charset=utf-8');
   res.set('Cache-Control', 'public, max-age=600');
+  res.set('Vary', 'Accept');
+  if (wantsMarkdown(req)) return sendMarkdown(res, blogIndexMarkdown(posts, 'es'));
+  res.set('Content-Type', 'text/html; charset=utf-8');
   res.send(renderBlogIndexHtml(posts, 'es'));
 });
 
 router.get('/blog/:slug', async (req, res, next) => {
   const post = await fetchPostBySlug(req.params.slug, 'es');
   if (!post) return next();
-  res.set('Content-Type', 'text/html; charset=utf-8');
   res.set('Cache-Control', 'public, max-age=600');
+  res.set('Vary', 'Accept');
+  if (wantsMarkdown(req)) return sendMarkdown(res, blogPostMarkdown(post));
+  res.set('Content-Type', 'text/html; charset=utf-8');
   res.send(renderBlogPostHtml(post));
 });
 
-router.get('/en/blog', async (_req, res) => {
+router.get('/en/blog', async (req, res) => {
   const posts = await fetchPostsByLocale('en');
-  res.set('Content-Type', 'text/html; charset=utf-8');
   res.set('Cache-Control', 'public, max-age=600');
+  res.set('Vary', 'Accept');
+  if (wantsMarkdown(req)) return sendMarkdown(res, blogIndexMarkdown(posts, 'en'));
+  res.set('Content-Type', 'text/html; charset=utf-8');
   res.send(renderBlogIndexHtml(posts, 'en'));
 });
 
 router.get('/en/blog/:slug', async (req, res, next) => {
   const post = await fetchPostBySlug(req.params.slug, 'en');
   if (!post) return next();
-  res.set('Content-Type', 'text/html; charset=utf-8');
   res.set('Cache-Control', 'public, max-age=600');
+  res.set('Vary', 'Accept');
+  if (wantsMarkdown(req)) return sendMarkdown(res, blogPostMarkdown(post));
+  res.set('Content-Type', 'text/html; charset=utf-8');
   res.send(renderBlogPostHtml(post));
 });
 
